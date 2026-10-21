@@ -1,6 +1,8 @@
 import React from 'react';
 import { playSound } from '../utils/audio';
 import { ProSpeakIcon } from './ProSpeakIcon';
+import { BrandMascot } from './BrandMascot';
+import { NotebookPen, CircleHelp } from 'lucide-react';
 
 interface StartMenuProps {
   isOpen: boolean;
@@ -27,13 +29,11 @@ export const StartMenu: React.FC<StartMenuProps> = ({
     <div
       id="start-menu"
       data-purpose="prospeak-start-menu"
-      className="absolute bottom-11 left-2 w-80 bg-white/95 backdrop-blur-md rounded-t-xl rounded-br-xl shadow-2xl border border-white/80 overflow-hidden z-50 transition-all duration-150 animate-in fade-in slide-in-from-bottom-2 select-none"
+      className="absolute bottom-11 left-2 w-80 bg-white/95 backdrop-blur-md rounded-t-xl rounded-br-xl shadow-2xl border border-white/80 max-h-[calc(100vh-65px)] overflow-y-auto z-50 transition-all duration-150 animate-in fade-in slide-in-from-bottom-2 select-none"
     >
       {/* User Card Header */}
       <div className="xp-titlebar-active p-3.5 flex items-center space-x-3 border-b border-[#BFD4E2]">
-        <div className="w-10 h-10 rounded-full bg-[#1E3B46] text-white flex items-center justify-center font-bold text-sm shadow-md border-2 border-white">
-          AR
-        </div>
+        <div className="w-10 h-10 rounded-full bg-white/65 flex items-center justify-center border-2 border-white"><BrandMascot size={38}/></div>
         <div>
           <h4 className="font-bold text-sm text-[#18343E]">Guest Learner</h4>
           <span className="text-[11px] text-[#426473]">ProSpeak guest · Pilot</span>
@@ -108,6 +108,14 @@ export const StartMenu: React.FC<StartMenuProps> = ({
           </div>
         </button>
 
+        <button onClick={() => handleItemClick('notebook')} className="w-full flex items-center space-x-3 p-2 rounded-lg hover:bg-[#EBF3F8] text-[#22414E] text-left group">
+          <span className="w-8 flex items-center justify-center text-[#A6748D]"><NotebookPen size={26}/></span>
+          <div><span className="font-bold block">My Notebook</span><span className="text-[10px] text-gray-500">Your saved English expressions</span></div>
+        </button>
+        <button onClick={() => handleItemClick('help')} className="w-full flex items-center space-x-3 p-2 rounded-lg hover:bg-[#EBF3F8] text-[#22414E] text-left group">
+          <span className="w-8 flex items-center justify-center text-[#6995AB]"><CircleHelp size={26}/></span>
+          <div><span className="font-bold block">Help & Guide</span><span className="text-[10px] text-gray-500">How ProSpeak OS works</span></div>
+        </button>
         <div className="border-t border-gray-100 my-1" />
 
         <button

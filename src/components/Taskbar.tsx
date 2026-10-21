@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { OSWindow } from '../types/os';
 import { playSound } from '../utils/audio';
 import { ProSpeakIcon, iconForWindow } from './ProSpeakIcon';
+import { BrandMascot } from './BrandMascot';
+import { BookOpen, CircleHelp } from 'lucide-react';
 
 interface TaskbarProps {
   windows: Record<string, OSWindow>;
@@ -9,6 +11,7 @@ interface TaskbarProps {
   onToggleWindow: (id: string) => void;
   isStartMenuOpen: boolean;
   onToggleStartMenu: () => void;
+  onOpenHelp: () => void;
 }
 
 export const Taskbar: React.FC<TaskbarProps> = ({
@@ -17,6 +20,7 @@ export const Taskbar: React.FC<TaskbarProps> = ({
   onToggleWindow,
   isStartMenuOpen,
   onToggleStartMenu,
+  onOpenHelp,
 }) => {
   const [currentTime, setCurrentTime] = useState('');
   const [isVolumeOpen, setIsVolumeOpen] = useState(false);
@@ -61,7 +65,7 @@ export const Taskbar: React.FC<TaskbarProps> = ({
           }`}
           title="ProSpeak OS Start Menu"
         >
-          <ProSpeakIcon name="mission" size={23} />
+          <BrandMascot size={27} />
           <span className="drop-shadow-sm font-semibold text-[13px] hidden xs:inline">ProSpeak</span>
         </button>
 
@@ -85,7 +89,7 @@ export const Taskbar: React.FC<TaskbarProps> = ({
                 }`}
                 title={win.title}
               >
-                <ProSpeakIcon name={iconForWindow(win.id)} size={22} />
+                {win.id === 'notebook' ? <BookOpen size={20}/> : win.id === 'help' ? <CircleHelp size={20}/> : <ProSpeakIcon name={iconForWindow(win.id)} size={22} />}
                 <span className="hidden md:inline text-[11.5px] truncate max-w-[120px]">{win.title}</span>
               </button>
             );
@@ -95,6 +99,7 @@ export const Taskbar: React.FC<TaskbarProps> = ({
 
       {/* System Tray */}
       <div className="flex items-center space-x-2.5 sm:space-x-3.5 bg-white/30 backdrop-blur-sm px-2.5 sm:px-3.5 py-1 rounded-lg border border-white/40 text-[#1E3B46] text-xs font-medium relative flex-shrink-0">
+        <button onClick={onOpenHelp} title="Help & Guide" aria-label="Open ProSpeak guide" className="hover:text-[#B7788E]"><CircleHelp size={18}/></button>
         {/* Network Icon */}
         <div title="Network Connected · 100 Mbps" className="cursor-pointer hover:text-black">
           <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#2B4E5D]" fill="currentColor" viewBox="0 0 20 20">

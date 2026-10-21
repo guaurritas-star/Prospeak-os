@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { OSWindow as OSWindowType } from '../types/os';
 import { playSound } from '../utils/audio';
 import { ProSpeakIcon, iconForWindow } from './ProSpeakIcon';
+import { BookOpen, CircleHelp } from 'lucide-react';
 
 interface OSWindowProps {
   window: OSWindowType;
@@ -114,7 +115,7 @@ export const OSWindow: React.FC<OSWindowProps> = ({
         } px-4 py-2 flex items-center justify-between cursor-move select-none rounded-t-2xl flex-shrink-0 transition-colors border-b border-[#BFD4E2]`}
       >
         <div className="flex items-center space-x-2.5 pointer-events-none">
-          <ProSpeakIcon name={iconForWindow(win.id)} size={22} />
+          {win.id === 'notebook' ? <BookOpen size={21}/> : win.id === 'help' ? <CircleHelp size={21}/> : <ProSpeakIcon name={iconForWindow(win.id)} size={22} />}
           <span className="text-xs sm:text-sm font-bold tracking-tight text-[#233F49] font-sans">{win.title}</span>
         </div>
 

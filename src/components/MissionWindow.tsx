@@ -4,9 +4,12 @@ import { playSound, speakText } from '../utils/audio';
 import { ProSpeakIcon } from './ProSpeakIcon';
 import { BookOpen, Paperclip, PencilLine, Volume2, Square, Sparkles, ArrowUpRight } from 'lucide-react';
 import { loadProgress, saveProgress, type MissionProgress } from '../utils/progress';
+import { addPhrase, hasPhrase } from '../utils/notebook';
+import { BookmarkPlus, BookmarkCheck } from 'lucide-react';
 
 interface MissionWindowProps {
   onOpenAgendaModal: () => void;
+  onOpenNotebook: () => void;
   onMessageMaya: (prompt: string) => void;
 }
 type Tab = 'mission' | 'learn' | 'practice' | 'feedback';
@@ -16,7 +19,7 @@ const meetingEmail = "Hi there, I'm excited to get started on the client project
 
 const words = (value: string) => value.trim() ? value.trim().split(/\s+/).length : 0;
 
-export const MissionWindow: React.FC<MissionWindowProps> = ({ onOpenAgendaModal, onMessageMaya }) => {
+export const MissionWindow: React.FC<MissionWindowProps> = ({ onOpenAgendaModal, onMessageMaya, onOpenNotebook }) => {
   const [progress, setProgress] = useState<MissionProgress>(loadProgress);
   const [step, setStep] = useState<Step>(() => {
     const p = loadProgress();
@@ -24,6 +27,7 @@ export const MissionWindow: React.FC<MissionWindowProps> = ({ onOpenAgendaModal,
   });
   const [tab, setTab] = useState<Tab>('mission');
   const [choice, setChoice] = useState<string>('');
+  const [notebookVersion, setNotebookVersion] = useState(0);
   const [reply, setReply] = useState('');
   const [tone, setTone] = useState('Professional & friendly');
   const [replyChecked, setReplyChecked] = useState(false);
@@ -224,13 +228,16 @@ export const MissionWindow: React.FC<MissionWindowProps> = ({ onOpenAgendaModal,
 
           {tab === 'learn' && (
             <section className="rounded-2xl border border-[#DCE8E0] bg-white p-5 space-y-3 text-[#294A57]">
-              <h3 className="font-serif font-bold text-xl">Useful phrases for your meeting</h3>
+              <div className="flex items-center justify-between flex-wrap gap-2"><h3 className="font-serif font-bold text-xl">Useful phrases for your meeting</h3><button className="text-sm underline text-[#865E75]" onClick={onOpenNotebook}>Open My Notebook</button></div>
               {[
                 ['Could you clarify…?', 'Ask for more information politely.'],
                 ["I'm looking forward to…", 'Express positive expectations.'],
                 ["I'd like to suggest…", 'Introduce your idea respectfully.'],
                 ["Thanks for sharing the agenda.", 'Acknowledge a colleague’s email.'],
-              ].map(([phrase, explanation]) => <div className="flex items-center justify-between border-b border-[#EBF0F2] py-3 gap-3" key={phrase}><div><strong className="text-base">{phrase}</strong><p className="text-sm text-[#607983]">{explanation}</p></div><button className="shrink-0 py-2 px-3 rounded-lg bg-[#EFF5F7] text-sm" onClick={() => speakText(phrase)} aria-label={'Listen to ' + phrase}><span className="inline-flex items-center gap-1"><Volume2 size={15} /> Listen</span></button></div>)}
+              ].map(([phrase, explanation]) => <div className="flex items-center justify-between border-b border-[#EBF0F2] py-3 gap-3" key={phrase}><div><strong className="text-base">{phrase}</strong><p className="text-sm text-[#607983]">{explanation}</p></div><div className="flex flex-col sm:flex-row gap-1 shrink-0">
+                  <button className="py-2 px-3 rounded-lg bg-[#EFF5F7] text-sm" onClick={() => speakText(phrase)} aria-label={'Listen to ' + phrase}><span className="inline-flex items-center gap-1"><Volume2 size={15} /> Listen</span></button>
+                  <button disabled={hasPhrase(phrase)} className="py-2 px-3 rounded-lg bg-[#F7ECF0] text-[#86556D] disabled:opacity-60 text-sm" onClick={() => {addPhrase(phrase, explanation);setNotebookVersion(v=>v+1);}} aria-label={'Save ' + phrase}>{hasPhrase(phrase) ? <span className="inline-flex items-center gap-1"><BookmarkCheck size={15}/> Saved</span> : <span className="inline-flex items-center gap-1"><BookmarkPlus size={15}/> Save</span>}</button>
+                </div></div>)}
               <p className="text-sm text-[#536F79]">These are examples, not the only correct way to communicate.</p>
             </section>
           )}

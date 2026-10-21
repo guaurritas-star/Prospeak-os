@@ -14,6 +14,11 @@ import { AgendaModal } from './components/AgendaModal';
 import { LogOffModal } from './components/LogOffModal';
 import { playSound } from './utils/audio';
 import { ProSpeakIcon } from './components/ProSpeakIcon';
+import { BrandMascot } from './components/BrandMascot';
+import { WelcomePanel } from './components/WelcomePanel';
+import { NotebookWindow } from './components/NotebookWindow';
+import { HelpWindow } from './components/HelpWindow';
+import { BookOpen, CircleHelp } from 'lucide-react';
 
 export default function App() {
   const [windows, setWindows] = useState<Record<string, OSWindowType>>({
@@ -94,6 +99,16 @@ export default function App() {
       y: 60,
       width: 740,
       height: 600,
+    },
+    notebook: {
+      id: 'notebook', title: 'My Notebook', icon: 'notebook', isOpen: false,
+      isMinimized: false, isMaximized: false, zIndex: 35, x: 75, y: 35,
+      width: 620, height: 590,
+    },
+    help: {
+      id: 'help', title: 'Help & Guide', icon: 'help', isOpen: false,
+      isMinimized: false, isMaximized: false, zIndex: 36, x: 95, y: 55,
+      width: 560, height: 570,
     },
     settings: {
       id: 'settings',
@@ -215,9 +230,7 @@ export default function App() {
       <div className={`h-screen w-screen overflow-hidden flex flex-col items-center justify-center relative select-none theme-${theme} bg-[#23424E]`}>
         <div aria-hidden="true" className="scenic-landscape-bg" />
         <div className="z-10 bg-white/95 backdrop-blur-md p-8 rounded-3xl shadow-2xl border border-white/80 flex flex-col items-center space-y-4 max-w-sm text-center">
-          <div className="w-20 h-20 rounded-full bg-[#1A3844] text-white flex items-center justify-center font-bold text-2xl shadow-lg border-4 border-white">
-            AR
-          </div>
+          <div className="w-20 h-20 rounded-full bg-[#EAF2F5] flex items-center justify-center shadow-lg border-4 border-white"><BrandMascot size={70}/></div>
           <div>
             <h2 className="text-xl font-serif font-bold text-[#1E3B46]">Guest Learner</h2>
             <p className="text-xs text-[#52707D]">ProSpeak Guest · Prototype</p>
@@ -262,14 +275,14 @@ export default function App() {
 
       {/* Top Left ProSpeak OS Brand */}
       <div className="absolute top-5 sm:top-7 left-8 sm:left-12 z-0 pointer-events-none select-none">
-        <div className="flex items-baseline space-x-2">
+        <div className="flex items-center gap-2 sm:gap-3"><BrandMascot size={54} className="hidden sm:block" /><div className="flex items-baseline space-x-2">
           <h1 className="text-4xl sm:text-5xl font-serif font-bold tracking-tight text-[#25424D] drop-shadow-xs">
             ProSpeak
           </h1>
           <span className="text-4xl sm:text-5xl font-serif italic text-[#C9919B] font-semibold">
             OS
           </span>
-        </div>
+        </div></div>
         <p className="text-xs sm:text-sm font-sans font-medium tracking-wide text-[#42616D] mt-0.5 ml-0.5 opacity-90">
           English for real conversations
         </p>
@@ -393,6 +406,7 @@ export default function App() {
             defaultPositionClasses="absolute left-2 top-2 w-[calc(100%-16px)] h-[calc(100%-16px)]"
           >
             <MissionWindow
+              onOpenNotebook={() => focusWindow('notebook')}
               onOpenAgendaModal={() => setIsAgendaModalOpen(true)}
               onMessageMaya={(prompt) => {
                 setInitialMayaPrompt(prompt);
@@ -477,6 +491,22 @@ export default function App() {
             <CareerWindow onSelectMission={() => focusWindow('mission')} />
           </OSWindow>
 
+          {/* My Notebook Window */}
+          <OSWindow
+            window={windows.notebook} isActive={activeWindowId === 'notebook'}
+            onFocus={focusWindow} onMinimize={minimizeWindow}
+            onMaximize={maximizeWindow} onClose={closeWindow} onMove={moveWindow}
+            defaultPositionClasses="absolute left-12 top-5 w-[620px] max-w-[90vw] h-[590px] max-h-[85vh]"
+          ><NotebookWindow /></OSWindow>
+
+          {/* Quick Help Window */}
+          <OSWindow
+            window={windows.help} isActive={activeWindowId === 'help'}
+            onFocus={focusWindow} onMinimize={minimizeWindow}
+            onMaximize={maximizeWindow} onClose={closeWindow} onMove={moveWindow}
+            defaultPositionClasses="absolute left-16 top-6 w-[560px] max-w-[90vw] h-[570px] max-h-[85vh]"
+          ><HelpWindow /></OSWindow>
+          
           {/* Audio & System Settings Window */}
           <OSWindow
             window={windows.settings}
@@ -506,12 +536,15 @@ export default function App() {
 
       {/* Taskbar / Dock at bottom */}
       <Taskbar
+        onOpenHelp={() => focusWindow('help')}
         windows={windows}
         activeWindowId={activeWindowId}
         onToggleWindow={toggleWindow}
         isStartMenuOpen={isStartMenuOpen}
         onToggleStartMenu={() => setIsStartMenuOpen(!isStartMenuOpen)}
       />
+
+      <WelcomePanel onStart={() => focusWindow('mission')} onHelp={() => focusWindow('help')} />
 
       {/* Agenda PDF Preview Modal */}
       <AgendaModal
