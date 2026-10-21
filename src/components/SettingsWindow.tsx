@@ -25,7 +25,7 @@ export const SettingsWindow: React.FC<SettingsWindowProps> = ({
   const handleTestVoice = () => {
     playSound('click');
     speakText(
-      'Welcome to ProSpeak OS. Your speech feedback and voice models are operating at peak fidelity.',
+      'Welcome to ProSpeak OS. This is a test of browser text to speech, not an assessment.',
       1,
       parseFloat(speechRate),
       accent
@@ -39,14 +39,14 @@ export const SettingsWindow: React.FC<SettingsWindowProps> = ({
           Audio, Microphone & System Settings
         </h3>
         <p className="text-gray-500 text-[11px]">
-          Configure your hardware devices and speech recognition parameters for ProSpeak OS.
+          Preview audio options. The browser controls the actual microphone device and permissions.
         </p>
       </div>
 
       {/* Microphone Hardware Config */}
       <div className="bg-[#F8FAFB] p-3.5 rounded-xl border border-gray-200 space-y-3">
         <div className="flex items-center justify-between">
-          <span className="font-bold text-xs text-[#20404C]">Microphone Device</span>
+          <span className="font-bold text-xs text-[#20404C]">Microphone Device (demo choices)</span>
           <button
             onClick={() => {
               setIsTestingMic(!isTestingMic);
@@ -58,7 +58,7 @@ export const SettingsWindow: React.FC<SettingsWindowProps> = ({
                 : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'
             }`}
           >
-            {isTestingMic ? '⏹️ Stop Mic Test' : '🎙️ Test Live Mic'}
+            {isTestingMic ? '⏹️ Hide Preview' : '🎙️ Preview Level (demo)'}
           </button>
         </div>
 
@@ -76,7 +76,7 @@ export const SettingsWindow: React.FC<SettingsWindowProps> = ({
           <div className="p-2.5 bg-white rounded-lg border border-rose-200 space-y-1.5 animate-in fade-in">
             <div className="flex items-center justify-between text-[10px] text-gray-500 font-medium">
               <span>Input Level:</span>
-              <span className="text-rose-600 font-bold">Live Meter</span>
+              <span className="text-rose-600 font-bold">Illustrative meter — not live</span>
             </div>
             <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden flex">
               <div className="bg-emerald-500 h-full w-[45%]" />
@@ -90,7 +90,7 @@ export const SettingsWindow: React.FC<SettingsWindowProps> = ({
       {/* Text To Speech Config */}
       <div className="bg-[#F8FAFB] p-3.5 rounded-xl border border-gray-200 space-y-3">
         <div className="flex items-center justify-between">
-          <span className="font-bold text-xs text-[#20404C]">Voice Feedback & Speed</span>
+          <span className="font-bold text-xs text-[#20404C]">Text-to-speech preview</span>
           <button
             onClick={handleTestVoice}
             className="px-2.5 py-1 rounded-md text-[10.5px] font-semibold bg-white border border-gray-200 text-[#294B59] hover:bg-gray-50 transition"
