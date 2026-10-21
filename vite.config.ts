@@ -5,6 +5,9 @@ import {defineConfig} from 'vite';
 
 export default defineConfig(() => {
   return {
+    // GitHub Pages serves project sites under /<repository-name>/.
+    // Keep / for AI Studio, Cloud Run and local development.
+    base: process.env.GITHUB_PAGES === 'true' ? '/Prospeak-os/' : '/',
     plugins: [react(), tailwindcss()],
     resolve: {
       alias: {
