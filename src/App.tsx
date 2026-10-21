@@ -306,10 +306,8 @@ export default function App() {
             }}
             className="group flex flex-col items-center justify-center p-2 rounded-xl transition-all duration-150 hover:bg-white/40 active:scale-95 focus:outline-none"
           >
-            <div className="w-11 h-11 sm:w-13 sm:h-13 p-2.5 rounded-2xl bg-gradient-to-b from-[#E7F3F8] to-[#BEDCE8] border border-white/80 shadow-md group-hover:shadow-lg transition-transform transform group-hover:-translate-y-0.5 flex items-center justify-center">
-              <svg className="w-7 h-7 sm:w-8 sm:h-8 text-[#264A57]" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
-              </svg>
+            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white/60 border border-white/80 shadow-md group-hover:shadow-lg transition-transform group-hover:-translate-y-0.5 flex items-center justify-center">
+              <ProSpeakIcon name="inbox" size={40} />
             </div>
             <span className="mt-1.5 text-xs font-semibold text-[#1C3640] tracking-tight text-center drop-shadow-[0_1px_2px_rgba(255,255,255,0.8)]">
               Inbox
@@ -324,7 +322,7 @@ export default function App() {
             }}
             className="group flex flex-col items-center justify-center p-2 rounded-xl transition-all duration-150 hover:bg-white/40 active:scale-95 focus:outline-none"
           >
-            <div className="w-11 h-11 sm:w-13 sm:h-13 p-2.5 rounded-2xl bg-gradient-to-b from-[#7FB1CC] to-[#4887A8] border border-white/80 shadow-md group-hover:shadow-lg transition-transform transform group-hover:-translate-y-0.5 flex items-center justify-center">
+            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white/60 border border-white/80 shadow-md group-hover:shadow-lg transition-transform group-hover:-translate-y-0.5 flex items-center justify-center">
               <ProSpeakIcon name="messenger" size={40} />
             </div>
             <span className="mt-1.5 text-xs font-semibold text-[#1C3640] tracking-tight text-center drop-shadow-[0_1px_2px_rgba(255,255,255,0.8)]">
@@ -340,7 +338,7 @@ export default function App() {
             }}
             className="group flex flex-col items-center justify-center p-2 rounded-xl transition-all duration-150 hover:bg-white/40 active:scale-95 focus:outline-none"
           >
-            <div className="w-11 h-11 sm:w-13 sm:h-13 p-2.5 rounded-2xl bg-gradient-to-b from-[#679AA8] to-[#3B6673] border border-white/80 shadow-md group-hover:shadow-lg transition-transform transform group-hover:-translate-y-0.5 flex items-center justify-center">
+            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white/60 border border-white/80 shadow-md group-hover:shadow-lg transition-transform group-hover:-translate-y-0.5 flex items-center justify-center">
               <ProSpeakIcon name="speaking" size={40} />
             </div>
             <span className="mt-1.5 text-xs font-semibold text-[#1C3640] tracking-tight text-center drop-shadow-[0_1px_2px_rgba(255,255,255,0.8)]">
@@ -356,7 +354,7 @@ export default function App() {
             }}
             className="group flex flex-col items-center justify-center p-2 rounded-xl transition-all duration-150 hover:bg-white/40 active:scale-95 focus:outline-none"
           >
-            <div className="w-11 h-11 sm:w-13 sm:h-13 p-2.5 rounded-2xl bg-gradient-to-b from-[#EDACB6] to-[#C47D8A] border border-white/80 shadow-md group-hover:shadow-lg transition-transform transform group-hover:-translate-y-0.5 flex items-center justify-center">
+            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white/60 border border-white/80 shadow-md group-hover:shadow-lg transition-transform group-hover:-translate-y-0.5 flex items-center justify-center">
               <ProSpeakIcon name="progress" size={40} />
             </div>
             <span className="mt-1.5 text-xs font-semibold text-[#1C3640] tracking-tight text-center drop-shadow-[0_1px_2px_rgba(255,255,255,0.8)]">
@@ -372,7 +370,7 @@ export default function App() {
             }}
             className="group flex flex-col items-center justify-center p-2 rounded-xl transition-all duration-150 hover:bg-white/40 active:scale-95 focus:outline-none"
           >
-            <div className="w-11 h-11 sm:w-13 sm:h-13 p-2.5 rounded-2xl bg-gradient-to-b from-[#8C6D68] to-[#59423E] border border-white/80 shadow-md group-hover:shadow-lg transition-transform transform group-hover:-translate-y-0.5 flex items-center justify-center">
+            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white/60 border border-white/80 shadow-md group-hover:shadow-lg transition-transform group-hover:-translate-y-0.5 flex items-center justify-center">
               <ProSpeakIcon name="career" size={40} />
             </div>
             <span className="mt-1.5 text-xs font-semibold text-[#1C3640] tracking-tight text-center drop-shadow-[0_1px_2px_rgba(255,255,255,0.8)]">
