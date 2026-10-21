@@ -13,13 +13,14 @@ import { SettingsWindow } from './components/SettingsWindow';
 import { AgendaModal } from './components/AgendaModal';
 import { LogOffModal } from './components/LogOffModal';
 import { playSound } from './utils/audio';
+import { ProSpeakIcon } from './components/ProSpeakIcon';
 
 export default function App() {
   const [windows, setWindows] = useState<Record<string, OSWindowType>>({
     mission: {
       id: 'mission',
       title: "Today's Mission",
-      icon: '🦎',
+      icon: 'mission',
       isOpen: true,
       isMinimized: false,
       isMaximized: false,
@@ -32,7 +33,7 @@ export default function App() {
     messenger: {
       id: 'messenger',
       title: 'Messenger',
-      icon: '💬',
+      icon: 'messenger',
       isOpen: false,
       isMinimized: false,
       isMaximized: false,
@@ -45,7 +46,7 @@ export default function App() {
     progress: {
       id: 'progress',
       title: 'My Progress',
-      icon: '📊',
+      icon: 'progress',
       isOpen: false,
       isMinimized: false,
       isMaximized: false,
@@ -58,7 +59,7 @@ export default function App() {
     speaking: {
       id: 'speaking',
       title: 'Speaking Lab',
-      icon: '🎙️',
+      icon: 'speaking',
       isOpen: false,
       isMinimized: false,
       isMaximized: false,
@@ -71,7 +72,7 @@ export default function App() {
     inbox: {
       id: 'inbox',
       title: 'Workplace Inbox',
-      icon: '📥',
+      icon: 'inbox',
       isOpen: false,
       isMinimized: false,
       isMaximized: false,
@@ -84,7 +85,7 @@ export default function App() {
     career: {
       id: 'career',
       title: 'Career Paths',
-      icon: '💼',
+      icon: 'career',
       isOpen: false,
       isMinimized: false,
       isMaximized: false,
@@ -97,7 +98,7 @@ export default function App() {
     settings: {
       id: 'settings',
       title: 'Audio & System Settings',
-      icon: '⚙️',
+      icon: 'settings',
       isOpen: false,
       isMinimized: false,
       isMaximized: false,
@@ -228,7 +229,7 @@ export default function App() {
             }}
             className="w-full py-2.5 px-6 rounded-xl bg-[#2A4D5C] hover:bg-[#1C3742] text-white font-bold text-sm transition shadow-md flex items-center justify-center space-x-2 active:scale-95"
           >
-            <span>🔓</span>
+            <span></span>
             <span>Resume Session</span>
           </button>
         </div>
@@ -324,9 +325,7 @@ export default function App() {
             className="group flex flex-col items-center justify-center p-2 rounded-xl transition-all duration-150 hover:bg-white/40 active:scale-95 focus:outline-none"
           >
             <div className="w-11 h-11 sm:w-13 sm:h-13 p-2.5 rounded-2xl bg-gradient-to-b from-[#7FB1CC] to-[#4887A8] border border-white/80 shadow-md group-hover:shadow-lg transition-transform transform group-hover:-translate-y-0.5 flex items-center justify-center">
-              <svg className="w-7 h-7 sm:w-8 sm:h-8 text-white" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a.75.75 0 01-.874-.954l.794-2.58A7.83 7.83 0 013 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" />
-              </svg>
+              <ProSpeakIcon name="messenger" size={40} />
             </div>
             <span className="mt-1.5 text-xs font-semibold text-[#1C3640] tracking-tight text-center drop-shadow-[0_1px_2px_rgba(255,255,255,0.8)]">
               Messenger
@@ -342,9 +341,7 @@ export default function App() {
             className="group flex flex-col items-center justify-center p-2 rounded-xl transition-all duration-150 hover:bg-white/40 active:scale-95 focus:outline-none"
           >
             <div className="w-11 h-11 sm:w-13 sm:h-13 p-2.5 rounded-2xl bg-gradient-to-b from-[#679AA8] to-[#3B6673] border border-white/80 shadow-md group-hover:shadow-lg transition-transform transform group-hover:-translate-y-0.5 flex items-center justify-center">
-              <svg className="w-7 h-7 sm:w-8 sm:h-8 text-white" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
-              </svg>
+              <ProSpeakIcon name="speaking" size={40} />
             </div>
             <span className="mt-1.5 text-xs font-semibold text-[#1C3640] tracking-tight text-center drop-shadow-[0_1px_2px_rgba(255,255,255,0.8)]">
               Speaking Lab
@@ -360,9 +357,7 @@ export default function App() {
             className="group flex flex-col items-center justify-center p-2 rounded-xl transition-all duration-150 hover:bg-white/40 active:scale-95 focus:outline-none"
           >
             <div className="w-11 h-11 sm:w-13 sm:h-13 p-2.5 rounded-2xl bg-gradient-to-b from-[#EDACB6] to-[#C47D8A] border border-white/80 shadow-md group-hover:shadow-lg transition-transform transform group-hover:-translate-y-0.5 flex items-center justify-center">
-              <svg className="w-7 h-7 sm:w-8 sm:h-8 text-white" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
-              </svg>
+              <ProSpeakIcon name="progress" size={40} />
             </div>
             <span className="mt-1.5 text-xs font-semibold text-[#1C3640] tracking-tight text-center drop-shadow-[0_1px_2px_rgba(255,255,255,0.8)]">
               My Progress
@@ -378,9 +373,7 @@ export default function App() {
             className="group flex flex-col items-center justify-center p-2 rounded-xl transition-all duration-150 hover:bg-white/40 active:scale-95 focus:outline-none"
           >
             <div className="w-11 h-11 sm:w-13 sm:h-13 p-2.5 rounded-2xl bg-gradient-to-b from-[#8C6D68] to-[#59423E] border border-white/80 shadow-md group-hover:shadow-lg transition-transform transform group-hover:-translate-y-0.5 flex items-center justify-center">
-              <svg className="w-7 h-7 sm:w-8 sm:h-8 text-[#FAECEB]" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25m16.5 0a2.18 2.18 0 00.75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 00-3.413-.387m4.5 8.006c-.194.165-.42.295-.673.38A23.978 23.978 0 0112 15.75c-2.648 0-5.195-.429-7.577-1.22a2.016 2.016 0 01-.673-.38m0 0A2.18 2.18 0 013 12.489V8.706c0-1.081.768-2.015 1.837-2.175a48.111 48.111 0 013.413-.387m7.5 0V5.25A2.25 2.25 0 0013.5 3h-3a2.25 2.25 0 00-2.25 2.25v1.069m7.5 0c.98.056 1.948.134 2.899.233m-10.399 0A47.55 47.55 0 0112 6.75c1.01 0 2.007.039 2.999.116" />
-              </svg>
+              <ProSpeakIcon name="career" size={40} />
             </div>
             <span className="mt-1.5 text-xs font-semibold text-[#1C3640] tracking-tight text-center drop-shadow-[0_1px_2px_rgba(255,255,255,0.8)]">
               Career Paths
