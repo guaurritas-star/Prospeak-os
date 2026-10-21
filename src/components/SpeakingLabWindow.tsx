@@ -1,267 +1,91 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { SpeakingExercise } from '../types/os';
+import React, { useEffect, useRef, useState } from 'react';
 import { playSound, speakText } from '../utils/audio';
 
+const drills = {
+  intro: { title: 'Meeting Self-Introduction', target: "Hi everyone, I'm Alex. I'll be helping with the project. I'm looking forward to working with you.", hint: 'Introduce yourself, your role and one thing you look forward to.' },
+  timeline: { title: 'Negotiating a Timeline', target: "I think we may need a little more time. Could we discuss moving the deadline?", hint: 'Ask politely for more time and explain why.' },
+  objection: { title: 'Responding to a Client', target: "Thank you for explaining your concern. Could you tell me a little more?", hint: 'Acknowledge a concern and ask a follow-up question.' },
+  twister: { title: 'Pronunciation Warm-up', target: 'Six simple sentences sound surprisingly similar.', hint: 'Practice slowly and listen to the reference. This tool does not score pronunciation.' },
+};
+type Drill = keyof typeof drills;
+const wordCount = (s: string) => s.trim() ? s.trim().split(/\s+/).length : 0;
+
 export const SpeakingLabWindow: React.FC = () => {
-  const [selectedDrill, setSelectedDrill] = useState<'intro' | 'timeline' | 'objection' | 'twister'>('intro');
-  const [isRecording, setIsRecording] = useState(false);
+  const [selectedDrill, setSelectedDrill] = useState<Drill>('intro');
   const [transcript, setTranscript] = useState('');
-  const [recordTimer, setRecordTimer] = useState(0);
-  const [evaluation, setEvaluation] = useState<{
-    score: number;
-    wpm: number;
-    fillers: number;
-    intonation: number;
-    articulation: number;
-    feedback: string;
-  } | null>(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const [error, setError] = useState('');
+  const [showReflection, setShowReflection] = useState(false);
+  const recognitionRef = useRef<any>(null);
+  const drill = drills[selectedDrill];
 
-  const speechRecognitionRef = useRef<any>(null);
-
-  const drills: Record<'intro' | 'timeline' | 'objection' | 'twister', SpeakingExercise> = {
-    intro: {
-      title: 'Meeting Self-Introduction',
-      target: `Hi everyone, I'm Alex. I'll be leading the product side for this initiative. I look forward to partnering closely with all of you to ensure we hit our key deliverables on time.`,
-      hint: 'Focus on warm energy, steady pacing, and clear emphasis on "product side" and "key deliverables".',
-    },
-    timeline: {
-      title: 'Diplomatic Timeline Negotiation',
-      target: `Based on our initial architectural assessment, pushing the staging release by two business days will give us the bandwidth to run rigorous quality assurance and avoid costly bugs later.`,
-      hint: 'Anchor your argument around client value and risk avoidance rather than workload.',
-    },
-    objection: {
-      title: 'Handling a Direct Client Objection',
-      target: `That is an understandable concern. Let me clarify what our scope includes and outline how we can accommodate that specific request without disrupting the critical path.`,
-      hint: 'Validate first ("understandable concern"), then pivot to solution-oriented phrasing.',
-    },
-    twister: {
-      title: 'Clarity & Enunciation Drill',
-      target: `Six senior strategic stakeholders specifically scheduled sixteen synchronous sprint showcases.`,
-      hint: 'Slow down and pronounce each "s", "st", and "sh" sound distinctly.',
-    },
-  };
-
-  const currentDrill = drills[selectedDrill];
-
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (isRecording) {
-      interval = setInterval(() => setRecordTimer((t) => t + 1), 1000);
-    } else {
-      setRecordTimer(0);
-    }
-    return () => clearInterval(interval);
-  }, [isRecording]);
+  useEffect(() => () => { try { recognitionRef.current?.abort(); } catch {} }, []);
 
   const toggleRecording = () => {
     if (isRecording) {
+      try { recognitionRef.current?.stop(); } catch {}
       setIsRecording(false);
-      try {
-        if (speechRecognitionRef.current) speechRecognitionRef.current.stop();
-      } catch {
-        // Ignore
-      }
-      playSound('ding');
-
-      // Calculate mock realistic metrics based on drill
-      const words = (transcript || currentDrill.target).split(' ').length;
-      const duration = Math.max(2, recordTimer);
-      const calculatedWpm = Math.round((words / duration) * 60) || 138;
-
-      setEvaluation({
-        score: 94,
-        wpm: Math.min(160, Math.max(120, calculatedWpm)),
-        fillers: 0,
-        intonation: 93,
-        articulation: 95,
-        feedback:
-          'Excellent cadencing. Your vowels were open, stress was placed on actionable verbs, and you did not use any filler sounds.',
-      });
-    } else {
+      return;
+    }
+    const Recognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!Recognition) {
+      setError('This browser does not support speech recognition. You can still type your response to practice.');
+      return;
+    }
+    try {
+      setError('');
+      setShowReflection(false);
+      const rec = new Recognition();
+      rec.lang = 'en-US';
+      rec.continuous = true;
+      rec.interimResults = true;
+      rec.onresult = (event: any) => {
+        setTranscript(Array.from(event.results as any[]).map((r: any) => r[0].transcript).join(' '));
+      };
+      rec.onerror = (event: any) => {
+        setIsRecording(false);
+        setError(event.error === 'not-allowed' ? 'Microphone permission denied. Try typing instead.' : 'Speech recognition was interrupted. You can retry or type.');
+      };
+      rec.onend = () => setIsRecording(false);
+      recognitionRef.current = rec;
+      rec.start();
       setIsRecording(true);
-      setTranscript('');
-      setEvaluation(null);
       playSound('click');
-
-      const SpeechRec = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-      if (SpeechRec) {
-        try {
-          const rec = new SpeechRec();
-          rec.continuous = true;
-          rec.interimResults = true;
-          rec.lang = 'en-US';
-          rec.onresult = (e: any) => {
-            let res = '';
-            for (let i = 0; i < e.results.length; i++) {
-              res += e.results[i][0].transcript;
-            }
-            setTranscript(res);
-          };
-          rec.onerror = () => {};
-          rec.start();
-          speechRecognitionRef.current = rec;
-        } catch {
-          // Fallback
-        }
-      }
-
-      setTimeout(() => {
-        setTranscript((t) => t || currentDrill.target);
-      }, 3000);
+    } catch {
+      setError('Could not start the microphone. Try typing your practice response.');
+      setIsRecording(false);
     }
   };
 
   return (
-    <div className="flex-1 flex flex-col overflow-y-auto bg-[#F8FAFB] text-xs p-4 sm:p-5 select-none space-y-4">
-      {/* Header bar */}
-      <div className="flex items-center justify-between pb-2 border-b border-gray-200 flex-shrink-0">
-        <div>
-          <h3 className="font-serif font-bold text-lg text-[#1F3D47]">Speaking Lab & Vocal Coach</h3>
-          <p className="text-[11px] text-gray-500">Train pitch, cadence, and professional articulation.</p>
-        </div>
-
-        {/* Drill Selectors */}
-        <div className="flex space-x-1 bg-white p-1 rounded-lg border border-gray-200">
-          {(['intro', 'timeline', 'objection', 'twister'] as const).map((drillKey) => (
-            <button
-              key={drillKey}
-              onClick={() => {
-                setSelectedDrill(drillKey);
-                setEvaluation(null);
-                setTranscript('');
-                playSound('click');
-              }}
-              className={`px-2.5 py-1 rounded-md text-[10.5px] font-semibold transition ${
-                selectedDrill === drillKey
-                  ? 'bg-[#2A4C59] text-white shadow-xs'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              {drillKey === 'intro'
-                ? '👋 Intro'
-                : drillKey === 'timeline'
-                ? '⏱️ Timeline'
-                : drillKey === 'objection'
-                ? '🛡️ Objections'
-                : '👅 Clarity'}
-            </button>
-          ))}
-        </div>
+    <div className="flex-1 min-h-0 overflow-y-auto bg-[#F8FAFB] p-4 sm:p-5 text-[#274653] space-y-4">
+      <header>
+        <h3 className="font-serif font-bold text-2xl">Speaking Lab</h3>
+        <p className="text-sm text-[#617A84]">Practice useful expressions at your own pace. Browser speech-to-text is optional.</p>
+      </header>
+      <div className="flex gap-2 overflow-x-auto pb-1" aria-label="Speaking exercise">
+        {(Object.keys(drills) as Drill[]).map((id) => (
+          <button key={id} onClick={() => { if (isRecording) { try { recognitionRef.current?.abort(); } catch {} setIsRecording(false); } setSelectedDrill(id); setTranscript(''); setError(''); setShowReflection(false); }}
+            className={'shrink-0 rounded-lg px-3 py-2 text-sm font-semibold border ' + (id === selectedDrill ? 'bg-[#F4E3E5] border-[#D7AFB9] text-[#804D5A]' : 'bg-white border-[#DAE7ED] text-[#4D6B77]')}>{drills[id].title}</button>
+        ))}
       </div>
-
-      {/* Target Phrase Card */}
-      <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-xs space-y-2">
-        <div className="flex items-center justify-between">
-          <span className="font-bold text-xs text-[#2A4B59] uppercase tracking-wider">
-            {currentDrill.title}
-          </span>
-          <button
-            onClick={() => {
-              playSound('click');
-              speakText(currentDrill.target, 1, 0.9);
-            }}
-            className="text-xs font-semibold text-[#8C4A55] hover:text-[#5E2B33] flex items-center space-x-1"
-          >
-            <span>🔈</span>
-            <span>Listen to Native Model</span>
-          </button>
-        </div>
-
-        <p className="text-sm font-serif italic text-gray-800 leading-relaxed bg-[#FDF8F9] p-3 rounded-lg border border-[#F5E2E6]">
-          "{currentDrill.target}"
-        </p>
-
-        <p className="text-[11px] text-gray-500 italic">💡 Coaching note: {currentDrill.hint}</p>
-      </div>
-
-      {/* Audio Visualizer & Recording Zone */}
-      <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-xs flex flex-col items-center justify-center space-y-3">
-        {/* Waveform Bars */}
-        <div className="flex items-center justify-center space-x-1 h-12 w-full max-w-xs">
-          {[4, 12, 28, 16, 32, 20, 36, 18, 8, 24, 14, 30, 10, 6].map((baseHeight, idx) => (
-            <span
-              key={idx}
-              style={{
-                height: isRecording ? `${Math.min(42, Math.max(6, baseHeight * (1 + (idx % 3) * 0.4)))}px` : '6px',
-              }}
-              className={`w-1.5 rounded-full transition-all duration-150 ${
-                isRecording ? 'bg-rose-500' : 'bg-slate-200'
-              }`}
-            />
-          ))}
-        </div>
-
-        <div className="w-full text-center">
-          {isRecording ? (
-            <div className="text-xs text-rose-600 font-semibold flex items-center justify-center space-x-2">
-              <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
-              <span>Recording live speech ({recordTimer}s)...</span>
-            </div>
-          ) : (
-            <p className="text-xs text-gray-400">
-              Press the button below and speak the sentence clearly into your mic.
-            </p>
-          )}
-
-          {transcript && (
-            <p className="text-xs text-gray-800 italic mt-2 bg-slate-50 p-2 rounded border border-gray-100 max-w-md mx-auto">
-              "{transcript}"
-            </p>
-          )}
-        </div>
-
-        <button
-          onClick={toggleRecording}
-          className={`py-2.5 px-6 rounded-full text-white font-bold text-xs flex items-center space-x-2 shadow-sm transition active:scale-95 ${
-            isRecording
-              ? 'bg-rose-600 hover:bg-rose-700 animate-pulse'
-              : 'bg-gradient-to-r from-[#294B59] to-[#1C3640] hover:brightness-110'
-          }`}
-        >
-          <span>{isRecording ? '⏹️' : '🎙️'}</span>
-          <span>{isRecording ? 'Stop Recording' : 'Start Speaking'}</span>
-        </button>
-      </div>
-
-      {/* Feedback Metrics Grid */}
-      {evaluation && (
-        <div className="bg-[#F2FAF5] border border-[#CCE8D5] rounded-xl p-4 text-[#204533] space-y-3 animate-in fade-in zoom-in-95">
-          <div className="flex items-center justify-between border-b border-[#D2EBD9] pb-2">
-            <span className="font-bold text-sm">Vocal Assessment Scorecard</span>
-            <span className="text-xs font-serif font-bold text-emerald-800 text-base">
-              Overall: {evaluation.score}/100
-            </span>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
-            <div className="bg-white p-2 rounded-lg border border-[#D5EBE0]">
-              <span className="text-[10px] text-gray-500 block">Pace</span>
-              <span className="font-bold text-sm text-[#20404C]">{evaluation.wpm} WPM</span>
-              <span className="text-[9px] text-emerald-600 block">Optimal</span>
-            </div>
-
-            <div className="bg-white p-2 rounded-lg border border-[#D5EBE0]">
-              <span className="text-[10px] text-gray-500 block">Filler Words</span>
-              <span className="font-bold text-sm text-emerald-700">{evaluation.fillers}</span>
-              <span className="text-[9px] text-emerald-600 block">Crisp pause control</span>
-            </div>
-
-            <div className="bg-white p-2 rounded-lg border border-[#D5EBE0]">
-              <span className="text-[10px] text-gray-500 block">Intonation</span>
-              <span className="font-bold text-sm text-[#20404C]">{evaluation.intonation}%</span>
-              <span className="text-[9px] text-emerald-600 block">Natural inflection</span>
-            </div>
-
-            <div className="bg-white p-2 rounded-lg border border-[#D5EBE0]">
-              <span className="text-[10px] text-gray-500 block">Articulation</span>
-              <span className="font-bold text-sm text-[#20404C]">{evaluation.articulation}%</span>
-              <span className="text-[9px] text-emerald-600 block">Clear consonants</span>
-            </div>
-          </div>
-
-          <p className="text-[11px] text-emerald-900 italic pt-1">{evaluation.feedback}</p>
-        </div>
-      )}
+      <section className="bg-white rounded-2xl border border-[#DCE7EC] p-5 space-y-4">
+        <h4 className="text-xl font-serif font-bold">{drill.title}</h4>
+        <p className="text-sm sm:text-base leading-relaxed">{drill.hint}</p>
+        <details className="bg-[#F8EBEF] rounded-xl border border-[#EFD5DD] p-3">
+          <summary className="text-sm font-semibold cursor-pointer text-[#804D5A]">Show an example (optional)</summary>
+          <p className="text-base mt-2 leading-relaxed">{drill.target}</p>
+          <button onClick={() => speakText(drill.target)} className="mt-2 text-sm underline text-[#804D5A]">🔈 Hear example</button>
+        </details>
+        <button className={'rounded-xl px-4 py-3 text-white font-semibold text-sm ' + (isRecording ? 'bg-[#AA5868]' : 'bg-[#2C5260]')} onClick={toggleRecording}>{isRecording ? '⏹ Stop speech recognition' : '🎙 Start speech recognition'}</button>
+        {isRecording && <p role="status" className="text-sm text-[#6A5261]">Listening… speak naturally.</p>}
+        {error && <p role="status" className="text-sm bg-[#FBEFF2] text-[#7F4754] rounded-lg p-3">{error}</p>}
+        <label className="block text-sm font-semibold" htmlFor="speaking-transcript">Your response / recognized transcript</label>
+        <textarea id="speaking-transcript" rows={5} className="w-full p-3 border border-[#BBD0D9] rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-[#9ABACB]" placeholder="Recognized speech appears here. You can also type if your microphone is unavailable." value={transcript} onChange={(e) => {setTranscript(e.target.value);setShowReflection(false);}} />
+        <p className="text-xs text-[#607884]">Speech recognition can mishear words; no audio is stored by ProSpeak OS. This demo does not assess pronunciation or confidence.</p>
+        <button disabled={wordCount(transcript) < 8} onClick={() => {setShowReflection(true);playSound('ding');}} className="w-full py-3 bg-[#2C5260] text-white rounded-xl font-semibold disabled:opacity-40">Review my practice →</button>
+        {showReflection && <div role="status" className="bg-[#EFF8F3] rounded-xl p-4 space-y-2 text-sm"><h5 className="font-bold">Practice recorded on this screen</h5><p>You entered {wordCount(transcript)} words. You can listen to the example and try expressing the same idea in your own words.</p><p>For pronunciation, tone and fluency feedback, practice with your ProSpeak teacher. No automated score has been generated.</p></div>}
+      </section>
     </div>
   );
 };

@@ -34,8 +34,8 @@ export const StartMenu: React.FC<StartMenuProps> = ({
           AR
         </div>
         <div>
-          <h4 className="font-bold text-sm text-[#18343E]">Alex Rivera</h4>
-          <span className="text-[11px] text-[#426473]">ProSpeak Scholar (Level 4)</span>
+          <h4 className="font-bold text-sm text-[#18343E]">Guest Learner</h4>
+          <span className="text-[11px] text-[#426473]">ProSpeak guest · Pilot</span>
         </div>
       </div>
 
@@ -70,7 +70,7 @@ export const StartMenu: React.FC<StartMenuProps> = ({
           <span className="text-xl group-hover:scale-110 transition-transform">📊</span>
           <div>
             <span className="font-bold block">Weekly Progress</span>
-            <span className="text-[10px] text-gray-500">72% Confidence · 7-Day Streak</span>
+            <span className="text-[10px] text-gray-500">View your actual practice activity</span>
           </div>
         </button>
 

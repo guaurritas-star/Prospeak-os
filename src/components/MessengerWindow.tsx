@@ -16,12 +16,13 @@ export const MessengerWindow: React.FC<MessengerWindowProps> = ({
       id: 'm1',
       sender: 'maya',
       text: "Hi! Ready to practice for your meeting? What would you like to focus on today?",
-      tips: 'You can test an introduction, negotiate a deadline, or ask for feedback on your phrasing.',
+      tips: 'Choose a situation: introductions, meetings, or expressing opinions. Maya uses scripted prompts in this prototype.',
     },
   ]);
   const [inputText, setInputText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
+  const [micIssue, setMicIssue] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const speechRecognitionRef = useRef<any>(null);
 
@@ -40,40 +41,36 @@ export const MessengerWindow: React.FC<MessengerWindowProps> = ({
     }
   }, [initialPrompt]);
 
+  // Scripted practice for the prototype. There is no generative AI integration yet.
   const generateMayaResponse = (userText: string): { text: string; tips?: string } => {
     const t = userText.toLowerCase();
-
-    if (t.includes('timeline') || t.includes('delay') || t.includes('deadline')) {
+    if (/\b(deadline|timeline|delay|reschedul|time)\b/.test(t)) {
       return {
-        text: `That's a very common workplace situation! When discussing timelines, try framing it around quality and risk mitigation: "To guarantee reliable performance at launch, I recommend allocating an extra two days for QA." Would you like to practice saying that out loud?`,
-        tips: 'Notice how "risk mitigation" sounds much more strategic than "we are behind schedule".',
+        text: "Let's roleplay: I'm your teammate. Our meeting is at 2 PM, but you have another commitment. How would you ask me to change the time politely?",
+        tips: 'You can try: "Could we move it to…?" This is a scripted prompt, not an evaluation.',
       };
     }
-
-    if (t.includes('disagree') || t.includes('conflict') || t.includes('interrupt') || t.includes('no')) {
+    if (/\b(disagree|conflict|concern|opinion)\b/.test(t)) {
       return {
-        text: `Navigating disagreements gracefully is a leadership superpower! Instead of "I disagree with you", try: "I see where you are coming from. Another perspective to explore is..." How does that phrasing feel to you?`,
-        tips: 'Using "perspective to explore" builds collaboration without confrontation.',
+        text: "Let's practice expressing a different opinion. I think the project is ready to launch today. What would you say if you disagreed?",
+        tips: 'You can begin with: "I see your point, but…" No automated grammar assessment is available yet.',
       };
     }
-
-    if (t.includes('hi') || t.includes('hello') || t.includes('alex') || t.includes('intro')) {
+    if (/\b(hi|hello|introduc|intro|name|role)\b/.test(t)) {
       return {
-        text: `Nice to hear from you! Your greeting was warm and clear. Let's do a roleplay: pretend I am the client's executive sponsor. Go ahead and introduce yourself and your role!`,
-        tips: 'Keep your intro under 30 seconds: 1) Who you are, 2) Key deliverable, 3) Collaborative question.',
+        text: "Nice to meet you! Let's pretend this is our first team meeting. What do you do, and what are you working on?",
+        tips: 'A helpful structure is: name, role, and one project detail.',
       };
     }
-
-    if (t.includes('agenda') || t.includes('kickoff') || t.includes('meeting')) {
+    if (/\b(agenda|kickoff|meeting)\b/.test(t)) {
       return {
-        text: `Great! In kickoff calls, keeping your intro crisp is ideal: 1) Who you are, 2) Your key deliverable, 3) Enthusiasm for collaboration. Try phrasing yours now!`,
-        tips: 'Clear opening sets a confident tone for the entire project.',
+        text: "We have a kickoff meeting on Monday. What would you like to ask before it starts?",
+        tips: 'Try a specific question using "Could you clarify…?"',
       };
     }
-
     return {
-      text: `Nicely phrased! That sounds very natural and professional. To elevate it further to an executive level, make sure to keep your tone measured and pause deliberately after your main point. What scenario should we drill next?`,
-      tips: 'Pausing gives stakeholders time to digest your insight and projects poise.',
+      text: "Let's continue practicing. Would you prefer a self-introduction, a meeting reschedule, or sharing an opinion?",
+      tips: 'This prototype selects replies from a small set of scenarios and cannot assess your English.',
     };
   };
 
@@ -127,7 +124,7 @@ export const MessengerWindow: React.FC<MessengerWindowProps> = ({
         // Ignore
       }
     } else {
-      setIsRecording(true);
+      setMicIssue('');
       playSound('click');
       const SpeechRec = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
       if (SpeechRec) {
@@ -147,13 +144,11 @@ export const MessengerWindow: React.FC<MessengerWindowProps> = ({
           rec.start();
           speechRecognitionRef.current = rec;
         } catch {
+          setMicIssue('Microphone unavailable. Please type your message instead.');
           setIsRecording(false);
         }
       } else {
-        setTimeout(() => {
-          setInputText("Hi Maya, let's practice pitching our project timeline.");
-          setIsRecording(false);
-        }, 1500);
+        setMicIssue('Speech recognition is not supported in this browser. You can type your response.');
       }
     }
   };
@@ -171,7 +166,7 @@ export const MessengerWindow: React.FC<MessengerWindowProps> = ({
           </div>
           <div>
             <h4 className="font-bold text-[#1E3B46] leading-tight">Maya</h4>
-            <span className="text-[10px] text-gray-500">AI Practice Partner · Online</span>
+            <span className="text-[10px] text-gray-500">Scripted Practice · Demo</span>
           </div>
         </div>
 
@@ -260,6 +255,8 @@ export const MessengerWindow: React.FC<MessengerWindowProps> = ({
         </button>
       </div>
 
+      {micIssue && <p role="status" className="text-xs px-3 py-2 bg-[#F8EBEF] text-[#7C4655]">{micIssue}</p>}
+
       {/* Input bar */}
       <div className="bg-white border-t border-gray-200 p-2.5 flex items-center space-x-2 flex-shrink-0">
         <button
@@ -280,7 +277,7 @@ export const MessengerWindow: React.FC<MessengerWindowProps> = ({
           onChange={(e) => setInputText(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleSend()}
           placeholder="Message Maya... (Press Enter to send)"
-          className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-xs text-[#20404C] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#2C5261]"
+          className="flex-1 min-w-0 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-base text-[#20404C] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#2C5261]"
         />
 
         <button

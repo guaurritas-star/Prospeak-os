@@ -134,7 +134,7 @@ export const CareerWindow: React.FC<CareerWindowProps> = ({ onSelectMission }) =
       <div className="w-56 border-r border-gray-200 bg-white p-3 space-y-2 flex-shrink-0 flex flex-col justify-between">
         <div className="space-y-1">
           <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-2 px-1">
-            Career Tracks
+            Career Tracks · Demo
           </span>
           {(['tech', 'exec', 'consult', 'sales'] as const).map((key) => {
             const trk = tracks[key];
@@ -154,7 +154,7 @@ export const CareerWindow: React.FC<CareerWindowProps> = ({ onSelectMission }) =
                 <div className="font-bold text-xs truncate">{trk.title}</div>
                 <div className="flex items-center justify-between text-[10px] text-gray-500 mt-1">
                   <span>{trk.level.split(':')[0]}</span>
-                  <span className="font-semibold text-emerald-700">{trk.progress}%</span>
+                  <span className="font-semibold text-emerald-700">Sample {trk.progress}%</span>
                 </div>
               </button>
             );
@@ -165,7 +165,7 @@ export const CareerWindow: React.FC<CareerWindowProps> = ({ onSelectMission }) =
         <div className="bg-[#FAF3F4] p-3 rounded-xl border border-[#F1D5DA] space-y-1 text-center">
           <span className="text-xl">🎓</span>
           <h4 className="font-bold text-xs text-[#7A3E47]">ProSpeak Scholar</h4>
-          <p className="text-[10px] text-gray-500">Certificate eligible after completing 8 core missions.</p>
+          <p className="text-[10px] text-gray-500">Preview only · career routes will be personalized in a later release.</p>
         </div>
       </div>
 
@@ -181,7 +181,7 @@ export const CareerWindow: React.FC<CareerWindowProps> = ({ onSelectMission }) =
               <h3 className="text-lg font-serif font-bold text-[#1F3D47] mt-0.5">{currentTrack.title}</h3>
             </div>
             <span className="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold">
-              {currentTrack.progress}% Complete
+              Sample path · {currentTrack.progress}% illustrative
             </span>
           </div>
 
