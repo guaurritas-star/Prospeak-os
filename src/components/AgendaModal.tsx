@@ -1,4 +1,5 @@
 import React from 'react';
+import { Paperclip } from 'lucide-react';
 import { playSound } from '../utils/audio';
 
 interface AgendaModalProps {
@@ -15,7 +16,7 @@ export const AgendaModal: React.FC<AgendaModalProps> = ({ isOpen, onClose }) => 
         {/* PDF Reader Top Header */}
         <div className="bg-[#26424D] text-white px-4 py-3 flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <span className="text-lg">📎</span>
+            <Paperclip size={20} />
             <div>
               <h3 className="text-xs font-bold leading-tight">Meeting_Agenda.pdf</h3>
               <span className="text-[10px] text-sky-200">328 KB · Acrobat Reader Preview</span>
