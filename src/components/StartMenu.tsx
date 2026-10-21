@@ -29,7 +29,7 @@ export const StartMenu: React.FC<StartMenuProps> = ({
     <div
       id="start-menu"
       data-purpose="prospeak-start-menu"
-      className="absolute bottom-11 left-2 w-80 bg-white/95 backdrop-blur-md rounded-t-xl rounded-br-xl shadow-2xl border border-white/80 overflow-hidden z-50 transition-all duration-150 animate-in fade-in slide-in-from-bottom-2 select-none"
+      className="absolute bottom-11 left-2 w-80 bg-white/95 backdrop-blur-md rounded-t-xl rounded-br-xl shadow-2xl border border-white/80 max-h-[calc(100vh-65px)] overflow-y-auto z-50 transition-all duration-150 animate-in fade-in slide-in-from-bottom-2 select-none"
     >
       {/* User Card Header */}
       <div className="xp-titlebar-active p-3.5 flex items-center space-x-3 border-b border-[#BFD4E2]">
