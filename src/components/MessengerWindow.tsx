@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ChatMessage } from '../types/os';
 import { playSound, speakText } from '../utils/audio';
+import { ProSpeakIcon } from './ProSpeakIcon';
+import { Lightbulb, CalendarClock, Handshake, Volume2, Mic, Square } from 'lucide-react';
 
 interface MessengerWindowProps {
   initialPrompt?: string;
@@ -160,7 +162,7 @@ export const MessengerWindow: React.FC<MessengerWindowProps> = ({
         <div className="flex items-center space-x-2">
           <div className="relative">
             <span className="w-8 h-8 rounded-full bg-[#EBF3F8] text-base flex items-center justify-center border border-[#BED7E5]">
-              👩🏻
+              <ProSpeakIcon name="messenger" size={24} />
             </span>
             <span className="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-emerald-500 border border-white" />
           </div>
@@ -189,7 +191,7 @@ export const MessengerWindow: React.FC<MessengerWindowProps> = ({
             <div className="flex items-start space-x-2 max-w-[88%]">
               {msg.sender === 'maya' && (
                 <span className="w-6 h-6 rounded-full bg-[#EAF2F7] text-xs flex items-center justify-center flex-shrink-0 mt-0.5 border border-[#CDE1EC]">
-                  👩🏻
+                  <ProSpeakIcon name="messenger" size={24} />
                 </span>
               )}
               <div
@@ -202,7 +204,7 @@ export const MessengerWindow: React.FC<MessengerWindowProps> = ({
                 <p>{msg.text}</p>
                 {msg.tips && (
                   <div className="mt-1.5 pt-1.5 border-t border-gray-100 text-[10px] text-[#4A7285] italic">
-                    💡 {msg.tips}
+                    <Lightbulb size={14} className="inline-block mr-1" /> {msg.tips}
                   </div>
                 )}
               </div>
@@ -214,7 +216,7 @@ export const MessengerWindow: React.FC<MessengerWindowProps> = ({
                 className="text-[9.5px] text-gray-400 hover:text-[#254654] flex items-center space-x-1 ml-8 mt-1"
                 title="Listen to this message"
               >
-                <span>🔈</span>
+                <Volume2 size={16} />
                 <span>Listen</span>
               </button>
             )}
@@ -224,7 +226,7 @@ export const MessengerWindow: React.FC<MessengerWindowProps> = ({
         {isTyping && (
           <div className="flex items-center space-x-2 text-gray-400 text-xs">
             <span className="w-6 h-6 rounded-full bg-[#EAF2F7] text-xs flex items-center justify-center flex-shrink-0 border border-[#CDE1EC]">
-              👩🏻
+              <ProSpeakIcon name="messenger" size={24} />
             </span>
             <span className="italic text-[10.5px] text-gray-500">Maya is typing...</span>
           </div>
@@ -239,19 +241,19 @@ export const MessengerWindow: React.FC<MessengerWindowProps> = ({
           onClick={() => handleSend("Let's practice how to introduce a new idea during a sprint sync.")}
           className="text-[10px] bg-white border border-gray-200 text-[#2B4E5D] px-2 py-0.5 rounded-full hover:bg-sky-50 whitespace-nowrap transition"
         >
-          💡 Introduce Idea
+          <Lightbulb size={14} className="inline-block mr-1" /> Introduce Idea
         </button>
         <button
           onClick={() => handleSend("How can I ask to push back a deadline without sounding unprepared?")}
           className="text-[10px] bg-white border border-gray-200 text-[#2B4E5D] px-2 py-0.5 rounded-full hover:bg-sky-50 whitespace-nowrap transition"
         >
-          🗓️ Negotiate Timeline
+          <CalendarClock size={14} className="inline-block mr-1" /> Negotiate Timeline
         </button>
         <button
           onClick={() => handleSend("What are polite ways to disagree with a senior stakeholder's proposal?")}
           className="text-[10px] bg-white border border-gray-200 text-[#2B4E5D] px-2 py-0.5 rounded-full hover:bg-sky-50 whitespace-nowrap transition"
         >
-          🤝 Disagree Politely
+          <Handshake size={14} className="inline-block mr-1" /> Disagree Politely
         </button>
       </div>
 
@@ -268,7 +270,7 @@ export const MessengerWindow: React.FC<MessengerWindowProps> = ({
           }`}
           title={isRecording ? 'Listening...' : 'Voice message'}
         >
-          <span className="text-sm">{isRecording ? '⏹️' : '🎙️'}</span>
+          <span className="text-sm">{isRecording ? <Square size={16} /> : <Mic size={16} />}</span>
         </button>
 
         <input
