@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { playSound, speakText } from '../utils/audio';
+import { Volume2, Mic, Square } from 'lucide-react';
 
 const drills = {
   intro: { title: 'Meeting Self-Introduction', target: "Hi everyone, I'm Alex. I'll be helping with the project. I'm looking forward to working with you.", hint: 'Introduce yourself, your role and one thing you look forward to.' },
@@ -75,9 +76,9 @@ export const SpeakingLabWindow: React.FC = () => {
         <details className="bg-[#F8EBEF] rounded-xl border border-[#EFD5DD] p-3">
           <summary className="text-sm font-semibold cursor-pointer text-[#804D5A]">Show an example (optional)</summary>
           <p className="text-base mt-2 leading-relaxed">{drill.target}</p>
-          <button onClick={() => speakText(drill.target)} className="mt-2 text-sm underline text-[#804D5A]">🔈 Hear example</button>
+          <button onClick={() => speakText(drill.target)} className="mt-2 text-sm underline text-[#804D5A]"><span className="inline-flex items-center gap-1"><Volume2 size={15} /> Hear example</span></button>
         </details>
-        <button className={'rounded-xl px-4 py-3 text-white font-semibold text-sm ' + (isRecording ? 'bg-[#AA5868]' : 'bg-[#2C5260]')} onClick={toggleRecording}>{isRecording ? '⏹ Stop speech recognition' : '🎙 Start speech recognition'}</button>
+        <button className={'rounded-xl px-4 py-3 text-white font-semibold text-sm ' + (isRecording ? 'bg-[#AA5868]' : 'bg-[#2C5260]')} onClick={toggleRecording}><span className="inline-flex items-center gap-2">{isRecording ? <Square size={16} /> : <Mic size={16} />}{isRecording ? 'Stop speech recognition' : 'Start speech recognition'}</span></button>
         {isRecording && <p role="status" className="text-sm text-[#6A5261]">Listening… speak naturally.</p>}
         {error && <p role="status" className="text-sm bg-[#FBEFF2] text-[#7F4754] rounded-lg p-3">{error}</p>}
         <label className="block text-sm font-semibold" htmlFor="speaking-transcript">Your response / recognized transcript</label>
