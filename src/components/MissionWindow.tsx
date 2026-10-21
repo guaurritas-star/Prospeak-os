@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import confetti from 'canvas-confetti';
 import { playSound, speakText } from '../utils/audio';
+import { ProSpeakIcon } from './ProSpeakIcon';
+import { BookOpen, Paperclip, PencilLine, Volume2, Square, Sparkles, ArrowUpRight } from 'lucide-react';
 import { loadProgress, saveProgress, type MissionProgress } from '../utils/progress';
 
 interface MissionWindowProps {
@@ -113,16 +115,16 @@ export const MissionWindow: React.FC<MissionWindowProps> = ({ onOpenAgendaModal,
     setTab('feedback');
   };
 
-  const tabClass = (active: boolean) => 'px-3 py-2 text-sm rounded-lg font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#274753] ' +
+  const tabClass = (active: boolean) => 'px-3 py-2 text-sm inline-flex items-center gap-1.5 whitespace-nowrap rounded-lg font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#274753] ' +
     (active ? 'bg-[#F4E3E5] text-[#864F57] border border-[#E8CCD1]' : 'text-[#4B6470] hover:bg-white');
 
   return (
     <div className="flex-1 min-h-0 flex flex-col bg-[#FCFCFD]">
       <nav className="flex items-center gap-1 p-2 border-b border-[#E1E9ED] bg-[#F8FAFB] overflow-x-auto flex-shrink-0" aria-label="Mission sections">
-        <button className={tabClass(tab === 'mission')} onClick={() => setTab('mission')}>🎯 Mission</button>
-        <button className={tabClass(tab === 'learn')} onClick={() => setTab('learn')}>📖 Learn</button>
-        <button className={tabClass(tab === 'practice')} onClick={() => setTab('practice')}>💬 Practice</button>
-        <button className={tabClass(tab === 'feedback')} onClick={() => setTab('feedback')}>📈 My results</button>
+        <button className={tabClass(tab === 'mission')} onClick={() => setTab('mission')}><ProSpeakIcon name="mission" size={21} /> Mission</button>
+        <button className={tabClass(tab === 'learn')} onClick={() => setTab('learn')}><BookOpen size={17} /> Learn</button>
+        <button className={tabClass(tab === 'practice')} onClick={() => setTab('practice')}><ProSpeakIcon name="messenger" size={21} /> Practice</button>
+        <button className={tabClass(tab === 'feedback')} onClick={() => setTab('feedback')}><ProSpeakIcon name="progress" size={21} /> My results</button>
       </nav>
       <div className="flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 py-5">
         <div className="max-w-3xl mx-auto space-y-4">
@@ -152,14 +154,14 @@ export const MissionWindow: React.FC<MissionWindowProps> = ({ onOpenAgendaModal,
 
           {tab === 'mission' && step === 1 && (
             <section className="rounded-2xl border border-[#E3E9ED] bg-white shadow-sm overflow-hidden" aria-labelledby="read-title">
-              <header className="bg-[#F8E9EC] px-5 py-3 text-[#7D4854] font-bold" id="read-title">📥 Step 1 · You've got mail</header>
+              <header className="bg-[#F8E9EC] px-5 py-3 text-[#7D4854] font-bold" id="read-title"><span className="inline-flex items-center gap-2"><ProSpeakIcon name="inbox" size={26} /> Step 1 · You've got mail</span></header>
               <div className="p-5 space-y-4 text-sm sm:text-base text-[#294A57] leading-relaxed">
-                <div className="flex items-center justify-between flex-wrap gap-2"><div><strong>Lisa Chen</strong><p className="text-xs text-[#687B82]">Subject: Kickoff meeting next week</p></div><button className="text-sm text-[#7F4D60] underline" onClick={() => speakText(meetingEmail)}>🔈 Listen</button></div>
+                <div className="flex items-center justify-between flex-wrap gap-2"><div><strong>Lisa Chen</strong><p className="text-xs text-[#687B82]">Subject: Kickoff meeting next week</p></div><button className="text-sm text-[#7F4D60] underline" onClick={() => speakText(meetingEmail)}><span className="inline-flex items-center gap-1"><Volume2 size={15} /> Listen</span></button></div>
                 <div className="rounded-lg bg-[#F9FBFC] border border-[#E4EDF1] p-4 space-y-3">
                   <p>Hi there,</p><p>I'm excited to get started on the client project. We'll have a kickoff meeting next Monday at 10 AM (EST) with the client team.</p>
                   <p>Could you please review the attached agenda and let me know if you have any questions or suggestions?</p><p>Best,<br/>Lisa</p>
                 </div>
-                <button className="text-sm underline text-[#3B6478]" onClick={onOpenAgendaModal}>📎 View meeting agenda</button>
+                <button className="text-sm underline text-[#3B6478]" onClick={onOpenAgendaModal}><span className="inline-flex items-center gap-1"><Paperclip size={15} /> View meeting agenda</span></button>
                 <fieldset className="space-y-2"><legend className="font-bold mb-2">What does Lisa want you to do?</legend>
                   {[
                     ['cancel', 'Cancel the meeting.'],
@@ -179,7 +181,7 @@ export const MissionWindow: React.FC<MissionWindowProps> = ({ onOpenAgendaModal,
 
           {tab === 'mission' && step === 2 && (
             <section className="rounded-2xl border border-[#DCE8DE] bg-white shadow-sm overflow-hidden" aria-labelledby="reply-title">
-              <header id="reply-title" className="bg-[#EDF5EE] px-5 py-3 font-bold text-[#496A54]">✍️ Step 2 · Write a response</header>
+              <header id="reply-title" className="bg-[#EDF5EE] px-5 py-3 font-bold text-[#496A54]"><span className="inline-flex items-center gap-2"><PencilLine size={21} /> Step 2 · Write a response</span></header>
               <div className="p-5 space-y-4 text-sm sm:text-base text-[#294A57]">
                 <p>Reply to Lisa in your own words. Thank her for the agenda and ask a useful question or share a suggestion. Your answer starts blank on purpose.</p>
                 <label className="block font-semibold" htmlFor="mission-reply">Your email</label>
@@ -197,11 +199,11 @@ export const MissionWindow: React.FC<MissionWindowProps> = ({ onOpenAgendaModal,
 
           {tab === 'mission' && step === 3 && (
             <section className="rounded-2xl border border-[#D7E7EE] bg-white shadow-sm overflow-hidden" aria-labelledby="speak-title">
-              <header id="speak-title" className="bg-[#E9F3F8] px-5 py-3 font-bold text-[#355D70]">🎙️ Step 3 · Your turn to speak</header>
+              <header id="speak-title" className="bg-[#E9F3F8] px-5 py-3 font-bold text-[#355D70]"><span className="inline-flex items-center gap-2"><ProSpeakIcon name="speaking" size={26} /> Step 3 · Your turn to speak</span></header>
               <div className="p-5 space-y-4 text-sm sm:text-base text-[#294A57]">
                 <p><strong>Situation:</strong> You joined the meeting. Introduce yourself, explain your role and ask one question about the project. Speak naturally; you don't need to be perfect.</p>
                 <details className="rounded-xl bg-[#F9EFF2] border border-[#F0D9DF] p-3"><summary className="cursor-pointer font-semibold text-[#874F60]">Need some useful phrases?</summary><p className="mt-2">“I'll be helping with…” · “Could you clarify…?” · “I'm looking forward to…”</p></details>
-                <div className="flex items-center gap-3 flex-wrap"><button onClick={recording ? stopRecognition : startRecording} className={'rounded-xl px-5 py-3 text-white font-semibold ' + (recording ? 'bg-[#AA5868]' : 'bg-[#284D5B]')}>{recording ? '⏹ Stop microphone' : '🎙 Start microphone'}</button><span className="text-xs text-[#536F79]">{recording ? 'Listening…' : 'English speech-to-text (if supported)'}</span></div>
+                <div className="flex items-center gap-3 flex-wrap"><button onClick={recording ? stopRecognition : startRecording} className={'rounded-xl px-5 py-3 text-white font-semibold ' + (recording ? 'bg-[#AA5868]' : 'bg-[#284D5B]')}><span className="inline-flex gap-2 items-center">{recording ? <Square size={16} /> : <ProSpeakIcon name="speaking" size={22} />}{recording ? 'Stop microphone' : 'Start microphone'}</span></button><span className="text-xs text-[#536F79]">{recording ? 'Listening…' : 'English speech-to-text (if supported)'}</span></div>
                 <label htmlFor="spoken-response" className="font-semibold block">Your spoken response / transcript</label>
                 <textarea id="spoken-response" rows={5} value={speechDraft} onChange={(e) => setSpeechDraft(e.target.value)} placeholder="Your recognized words will appear here. You can also type your response if microphone access is unavailable." className="w-full rounded-xl border border-[#C9DDE3] p-3.5 text-base focus:ring-2 focus:ring-[#A6BFCB] focus:outline-none" />
                 <p className="text-xs text-[#536F79]">This is not a pronunciation assessment. Speech recognition can make transcription errors.</p>
@@ -213,7 +215,7 @@ export const MissionWindow: React.FC<MissionWindowProps> = ({ onOpenAgendaModal,
 
           {tab === 'mission' && step === 4 && (
             <section className="rounded-2xl border border-[#C9DCD2] bg-[#F7FBF8] p-6 space-y-3 text-[#294A57] text-sm sm:text-base">
-              <h3 className="text-2xl font-serif font-bold">✨ You've practiced all three skills!</h3>
+              <h3 className="text-2xl font-serif font-bold"><Sparkles size={23} className="inline-block mr-1" /> You've practiced all three skills!</h3>
               <p>You understood Lisa's request, prepared your own written reply, and practiced your spoken introduction.</p>
               <p><strong>Reflection:</strong> Which expression would you like to use in your next real conversation?</p>
               <button onClick={finishMission} className="w-full rounded-xl py-3 px-4 bg-[#284D5B] text-white font-semibold">{progress.completed ? 'Review your results →' : 'Complete mission ✓'}</button>
@@ -228,7 +230,7 @@ export const MissionWindow: React.FC<MissionWindowProps> = ({ onOpenAgendaModal,
                 ["I'm looking forward to…", 'Express positive expectations.'],
                 ["I'd like to suggest…", 'Introduce your idea respectfully.'],
                 ["Thanks for sharing the agenda.", 'Acknowledge a colleague’s email.'],
-              ].map(([phrase, explanation]) => <div className="flex items-center justify-between border-b border-[#EBF0F2] py-3 gap-3" key={phrase}><div><strong className="text-base">{phrase}</strong><p className="text-sm text-[#607983]">{explanation}</p></div><button className="shrink-0 py-2 px-3 rounded-lg bg-[#EFF5F7] text-sm" onClick={() => speakText(phrase)} aria-label={'Listen to ' + phrase}>🔈 Listen</button></div>)}
+              ].map(([phrase, explanation]) => <div className="flex items-center justify-between border-b border-[#EBF0F2] py-3 gap-3" key={phrase}><div><strong className="text-base">{phrase}</strong><p className="text-sm text-[#607983]">{explanation}</p></div><button className="shrink-0 py-2 px-3 rounded-lg bg-[#EFF5F7] text-sm" onClick={() => speakText(phrase)} aria-label={'Listen to ' + phrase}><span className="inline-flex items-center gap-1"><Volume2 size={15} /> Listen</span></button></div>)}
               <p className="text-sm text-[#536F79]">These are examples, not the only correct way to communicate.</p>
             </section>
           )}
@@ -239,7 +241,7 @@ export const MissionWindow: React.FC<MissionWindowProps> = ({ onOpenAgendaModal,
               <p>A teammate has proposed a meeting time that you can't attend. Which reply offers a useful alternative?</p>
               <div className="grid gap-2">{[['a','No. Bad timing.'],['b','Thanks for letting me know. Could we meet at 3 PM instead?'],['c','I maybe will come.']].map(([v,label]) => <button key={v} onClick={() => setPracticeChoice(v)} className={'text-left p-3 rounded-xl border text-base ' + (practiceChoice === v ? 'border-[#AD748B] bg-[#F9EFF2]' : 'border-[#DFE6E9]')}>{label}</button>)}</div>
               {practiceChoice && <p role="status" className="p-3 bg-[#F2F8FA] rounded-lg text-sm">{practiceChoice === 'b' ? 'Exactly. Your answer is polite and gives a specific alternative.' : 'That might be misunderstood. Try offering a specific alternative in a polite tone.'}</p>}
-              <button onClick={() => onMessageMaya("Let's practice rescheduling a meeting. Please act as my teammate.")} className="w-full py-3 px-4 rounded-xl bg-[#284D5B] text-white font-semibold">Open Messenger for more practice ↗</button>
+              <button onClick={() => onMessageMaya("Let's practice rescheduling a meeting. Please act as my teammate.")} className="w-full py-3 px-4 rounded-xl bg-[#284D5B] text-white font-semibold"><span className="inline-flex items-center justify-center gap-2">Open Messenger for more practice <ArrowUpRight size={17} /></span></button>
               <p className="text-xs text-[#536F79]">Messenger currently uses scripted replies, not a connected AI model.</p>
             </section>
           )}
