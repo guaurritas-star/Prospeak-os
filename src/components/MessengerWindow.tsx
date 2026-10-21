@@ -22,6 +22,7 @@ export const MessengerWindow: React.FC<MessengerWindowProps> = ({
   const [inputText, setInputText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
+  const [micIssue, setMicIssue] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const speechRecognitionRef = useRef<any>(null);
 
@@ -123,7 +124,7 @@ export const MessengerWindow: React.FC<MessengerWindowProps> = ({
         // Ignore
       }
     } else {
-      setIsRecording(true);
+      setMicIssue('');
       playSound('click');
       const SpeechRec = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
       if (SpeechRec) {
@@ -143,13 +144,11 @@ export const MessengerWindow: React.FC<MessengerWindowProps> = ({
           rec.start();
           speechRecognitionRef.current = rec;
         } catch {
+          setMicIssue('Microphone unavailable. Please type your message instead.');
           setIsRecording(false);
         }
       } else {
-        setTimeout(() => {
-          setInputText("Hi Maya, let's practice pitching our project timeline.");
-          setIsRecording(false);
-        }, 1500);
+        setMicIssue('Speech recognition is not supported in this browser. You can type your response.');
       }
     }
   };
@@ -256,6 +255,8 @@ export const MessengerWindow: React.FC<MessengerWindowProps> = ({
         </button>
       </div>
 
+      {micIssue && <p role="status" className="text-xs px-3 py-2 bg-[#F8EBEF] text-[#7C4655]">{micIssue}</p>}
+
       {/* Input bar */}
       <div className="bg-white border-t border-gray-200 p-2.5 flex items-center space-x-2 flex-shrink-0">
         <button
@@ -276,7 +277,7 @@ export const MessengerWindow: React.FC<MessengerWindowProps> = ({
           onChange={(e) => setInputText(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleSend()}
           placeholder="Message Maya... (Press Enter to send)"
-          className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-xs text-[#20404C] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#2C5261]"
+          className="flex-1 min-w-0 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-base text-[#20404C] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#2C5261]"
         />
 
         <button
