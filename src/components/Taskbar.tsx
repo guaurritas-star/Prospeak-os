@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { OSWindow } from '../types/os';
 import { playSound } from '../utils/audio';
+import { ProSpeakIcon, iconForWindow } from './ProSpeakIcon';
 
 interface TaskbarProps {
   windows: Record<string, OSWindow>;
@@ -60,7 +61,7 @@ export const Taskbar: React.FC<TaskbarProps> = ({
           }`}
           title="ProSpeak OS Start Menu"
         >
-          <span className="text-sm">🦎</span>
+          <ProSpeakIcon name="mission" size={23} />
           <span className="drop-shadow-sm font-semibold text-[13px] hidden xs:inline">ProSpeak</span>
         </button>
 
@@ -84,7 +85,7 @@ export const Taskbar: React.FC<TaskbarProps> = ({
                 }`}
                 title={win.title}
               >
-                <span className="text-sm">{win.icon}</span>
+                <ProSpeakIcon name={iconForWindow(win.id)} size={22} />
                 <span className="hidden md:inline text-[11.5px] truncate max-w-[120px]">{win.title}</span>
               </button>
             );

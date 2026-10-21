@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { playSound, speakText, setSoundEffectsEnabled, isSoundEffectsEnabled } from '../utils/audio';
+import { Mic, Square, Volume2 } from 'lucide-react';
 
 interface SettingsWindowProps {
   onSelectTheme: (theme: string) => void;
@@ -58,7 +59,7 @@ export const SettingsWindow: React.FC<SettingsWindowProps> = ({
                 : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'
             }`}
           >
-            {isTestingMic ? '⏹️ Hide Preview' : '🎙️ Preview Level (demo)'}
+            <span className="inline-flex gap-1 items-center">{isTestingMic ? <Square size={14} /> : <Mic size={14} />}{isTestingMic ? 'Hide Preview' : 'Preview Level (demo)'}</span>
           </button>
         </div>
 
@@ -95,7 +96,7 @@ export const SettingsWindow: React.FC<SettingsWindowProps> = ({
             onClick={handleTestVoice}
             className="px-2.5 py-1 rounded-md text-[10.5px] font-semibold bg-white border border-gray-200 text-[#294B59] hover:bg-gray-50 transition"
           >
-            🔊 Test Voice
+            <span className="inline-flex items-center gap-1"><Volume2 size={15} /> Test Voice</span>
           </button>
         </div>
 
@@ -167,10 +168,10 @@ export const SettingsWindow: React.FC<SettingsWindowProps> = ({
           <span className="font-bold text-xs text-[#20404C] block">Desktop Atmosphere & Theme</span>
           <div className="grid grid-cols-2 gap-2">
             {[
-              { id: 'default', label: '🌊 Classic Slate Blue' },
-              { id: 'forest', label: '🌲 Deep Forest' },
-              { id: 'sand', label: '🏜️ Warm Sand' },
-              { id: 'obsidian', label: '🌑 Modern Obsidian' },
+              { id: 'default', label: 'Classic Slate Blue' },
+              { id: 'forest', label: 'Deep Forest' },
+              { id: 'sand', label: 'Warm Sand' },
+              { id: 'obsidian', label: 'Modern Obsidian' },
             ].map((thm) => (
               <button
                 key={thm.id}
@@ -184,7 +185,7 @@ export const SettingsWindow: React.FC<SettingsWindowProps> = ({
                     : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
                 }`}
               >
-                {thm.label}
+                <span className="inline-flex items-center gap-2"><span aria-hidden="true" className="h-3 w-3 rounded-full border border-white/70 shadow-sm" style={{backgroundColor:({default:"#729CAD",forest:"#739683",sand:"#D1BDA3",obsidian:"#314854"} as Record<string,string>)[thm.id]}} />{thm.label}</span>
               </button>
             ))}
           </div>

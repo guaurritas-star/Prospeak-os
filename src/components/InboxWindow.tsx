@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { EmailItem } from '../types/os';
 import { playSound, speakText } from '../utils/audio';
+import { ProSpeakIcon } from './ProSpeakIcon';
+import { Paperclip, Volume2 } from 'lucide-react';
 
 interface InboxWindowProps {
   onOpenAgendaModal: () => void;
@@ -124,7 +126,7 @@ export const InboxWindow: React.FC<InboxWindowProps> = ({
 
                 {email.attachment && (
                   <span className="inline-flex items-center space-x-1 text-[9px] text-gray-400 mt-1 bg-gray-100 px-1.5 py-0.5 rounded">
-                    <span>📎</span>
+                    <Paperclip size={14} />
                     <span>{email.attachment.name}</span>
                   </span>
                 )}
@@ -156,7 +158,7 @@ export const InboxWindow: React.FC<InboxWindowProps> = ({
             className="text-[10.5px] font-semibold text-[#8C4A55] hover:text-[#5C2B33] flex items-center space-x-1 bg-rose-50 hover:bg-rose-100 px-2.5 py-1 rounded-full border border-rose-200 transition"
             title="Read email body aloud"
           >
-            <span>{isPlayingAudio ? '🔊' : '🔈'}</span>
+            <Volume2 size={17} />
             <span>{isPlayingAudio ? 'Speaking...' : 'Listen'}</span>
           </button>
         </div>
@@ -170,7 +172,7 @@ export const InboxWindow: React.FC<InboxWindowProps> = ({
         {selectedEmail.attachment && (
           <div className="bg-[#F8FAFB] p-3 rounded-xl border border-gray-200 flex items-center justify-between max-w-sm">
             <div className="flex items-center space-x-2.5">
-              <span className="text-xl">📎</span>
+              <Paperclip size={23} />
               <div>
                 <span className="font-bold text-[11px] text-[#244754] block">
                   {selectedEmail.attachment.name}
@@ -194,7 +196,7 @@ export const InboxWindow: React.FC<InboxWindowProps> = ({
         {selectedEmail.id === 'e1' && (
           <div className="bg-[#FAF2F4] p-3 rounded-xl border border-[#F2D6DC] flex items-center justify-between text-xs mt-4">
             <div className="flex items-center space-x-2">
-              <span className="text-base">🎯</span>
+              <ProSpeakIcon name="mission" size={22} />
               <span className="text-[#783D47] font-semibold">
                 This email is part of Today's Kickoff Mission.
               </span>

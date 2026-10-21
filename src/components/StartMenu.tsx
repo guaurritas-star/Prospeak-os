@@ -1,5 +1,6 @@
 import React from 'react';
 import { playSound } from '../utils/audio';
+import { ProSpeakIcon } from './ProSpeakIcon';
 
 interface StartMenuProps {
   isOpen: boolean;
@@ -45,7 +46,7 @@ export const StartMenu: React.FC<StartMenuProps> = ({
           onClick={() => handleItemClick('mission')}
           className="w-full flex items-center space-x-3 p-2 rounded-lg hover:bg-[#EBF3F8] text-[#22414E] transition text-left group"
         >
-          <span className="text-xl group-hover:scale-110 transition-transform">🎯</span>
+          <ProSpeakIcon name="mission" size={32} className="group-hover:scale-110 transition-transform" />
           <div>
             <span className="font-bold block">Today's Mission</span>
             <span className="text-[10px] text-gray-500">Business Communication & Kickoff</span>
@@ -56,7 +57,7 @@ export const StartMenu: React.FC<StartMenuProps> = ({
           onClick={() => handleItemClick('messenger')}
           className="w-full flex items-center space-x-3 p-2 rounded-lg hover:bg-[#EBF3F8] text-[#22414E] transition text-left group"
         >
-          <span className="text-xl group-hover:scale-110 transition-transform">💬</span>
+          <ProSpeakIcon name="messenger" size={32} className="group-hover:scale-110 transition-transform" />
           <div>
             <span className="font-bold block">Messenger with Maya</span>
             <span className="text-[10px] text-gray-500">Practice conversations anytime</span>
@@ -67,7 +68,7 @@ export const StartMenu: React.FC<StartMenuProps> = ({
           onClick={() => handleItemClick('progress')}
           className="w-full flex items-center space-x-3 p-2 rounded-lg hover:bg-[#EBF3F8] text-[#22414E] transition text-left group"
         >
-          <span className="text-xl group-hover:scale-110 transition-transform">📊</span>
+          <ProSpeakIcon name="progress" size={32} className="group-hover:scale-110 transition-transform" />
           <div>
             <span className="font-bold block">Weekly Progress</span>
             <span className="text-[10px] text-gray-500">View your actual practice activity</span>
@@ -78,7 +79,7 @@ export const StartMenu: React.FC<StartMenuProps> = ({
           onClick={() => handleItemClick('speaking')}
           className="w-full flex items-center space-x-3 p-2 rounded-lg hover:bg-[#EBF3F8] text-[#22414E] transition text-left group"
         >
-          <span className="text-xl group-hover:scale-110 transition-transform">🎙️</span>
+          <ProSpeakIcon name="speaking" size={32} className="group-hover:scale-110 transition-transform" />
           <div>
             <span className="font-bold block">Speaking Lab</span>
             <span className="text-[10px] text-gray-500">Pronunciation, cadence & microphone coach</span>
@@ -89,7 +90,7 @@ export const StartMenu: React.FC<StartMenuProps> = ({
           onClick={() => handleItemClick('inbox')}
           className="w-full flex items-center space-x-3 p-2 rounded-lg hover:bg-[#EBF3F8] text-[#22414E] transition text-left group"
         >
-          <span className="text-xl group-hover:scale-110 transition-transform">📥</span>
+          <ProSpeakIcon name="inbox" size={32} className="group-hover:scale-110 transition-transform" />
           <div>
             <span className="font-bold block">Workplace Inbox</span>
             <span className="text-[10px] text-gray-500">Real colleague emails & agendas</span>
@@ -100,7 +101,7 @@ export const StartMenu: React.FC<StartMenuProps> = ({
           onClick={() => handleItemClick('career')}
           className="w-full flex items-center space-x-3 p-2 rounded-lg hover:bg-[#EBF3F8] text-[#22414E] transition text-left group"
         >
-          <span className="text-xl group-hover:scale-110 transition-transform">💼</span>
+          <ProSpeakIcon name="career" size={32} className="group-hover:scale-110 transition-transform" />
           <div>
             <span className="font-bold block">Career Paths</span>
             <span className="text-[10px] text-gray-500">Leadership milestones & skill trees</span>
@@ -113,7 +114,7 @@ export const StartMenu: React.FC<StartMenuProps> = ({
           onClick={() => handleItemClick('settings')}
           className="w-full flex items-center space-x-3 p-2 rounded-lg hover:bg-[#EBF3F8] text-[#3E5C68] transition text-left"
         >
-          <span className="text-lg">⚙️</span>
+          <ProSpeakIcon name="settings" size={26} />
           <span className="font-medium text-xs">Audio & Microphone Settings</span>
         </button>
       </div>

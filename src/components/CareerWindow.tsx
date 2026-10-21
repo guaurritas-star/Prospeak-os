@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { CareerTrack } from '../types/os';
 import { playSound } from '../utils/audio';
+import { ProSpeakIcon } from './ProSpeakIcon';
+import { LockKeyhole } from 'lucide-react';
 
 interface CareerWindowProps {
   onSelectMission: () => void;
@@ -163,7 +165,7 @@ export const CareerWindow: React.FC<CareerWindowProps> = ({ onSelectMission }) =
 
         {/* Scholar Certificate Card */}
         <div className="bg-[#FAF3F4] p-3 rounded-xl border border-[#F1D5DA] space-y-1 text-center">
-          <span className="text-xl">🎓</span>
+          <ProSpeakIcon name="career" size={30} />
           <h4 className="font-bold text-xs text-[#7A3E47]">ProSpeak Scholar</h4>
           <p className="text-[10px] text-gray-500">Preview only · career routes will be personalized in a later release.</p>
         </div>
@@ -254,7 +256,7 @@ export const CareerWindow: React.FC<CareerWindowProps> = ({ onSelectMission }) =
                   Resume →
                 </button>
               ) : (
-                <span className="text-[10.5px] text-gray-400 font-medium">🔒 Locked</span>
+                <span className="text-[10.5px] text-gray-400 font-medium"><LockKeyhole size={12} className="inline-block mr-1" /> Locked</span>
               )}
             </div>
           ))}
