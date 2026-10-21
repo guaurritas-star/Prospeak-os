@@ -29,18 +29,25 @@ export const OSWindow: React.FC<OSWindowProps> = ({
 }) => {
   const [pos, setPos] = useState({ x: win.x, y: win.y });
   const [isDragging, setIsDragging] = useState(false);
+  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
   const dragRef = useRef({ mouseX: 0, mouseY: 0, posX: 0, posY: 0 });
 
   useEffect(() => {
     setPos({ x: win.x, y: win.y });
   }, [win.x, win.y]);
 
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
   const handleMouseDown = (e: React.MouseEvent) => {
     onFocus(win.id);
-    if (win.isMaximized) return;
+    if (win.isMaximized || isMobile) return;
 
     const target = e.target as HTMLElement;
-    if (target.closest('button') || target.closest('input') || target.closest('select')) return;
+    if (target.closest('button, input, select, textarea, a, summary')) return;
 
     setIsDragging(true);
     dragRef.current = {
@@ -53,8 +60,14 @@ export const OSWindow: React.FC<OSWindowProps> = ({
     const handleMouseMove = (moveEvent: MouseEvent) => {
       const dx = moveEvent.clientX - dragRef.current.mouseX;
       const dy = moveEvent.clientY - dragRef.current.mouseY;
-      const newX = Math.max(-200, Math.min(window.innerWidth - 150, dragRef.current.posX + dx));
-      const newY = Math.max(0, Math.min(window.innerHeight - 100, dragRef.current.posY + dy));
+      const container = document.getElementById('window-container');
+      const bounds = container?.getBoundingClientRect();
+      const element = document.getElementById('window-' + win.id);
+      const size = element?.getBoundingClientRect();
+      const maxX = Math.max(0, (bounds?.width ?? window.innerWidth) - (size?.width ?? win.width));
+      const maxY = Math.max(0, (bounds?.height ?? window.innerHeight - 52) - (size?.height ?? win.height));
+      const newX = Math.max(0, Math.min(maxX, dragRef.current.posX + dx));
+      const newY = Math.max(0, Math.min(maxY, dragRef.current.posY + dy));
       setPos({ x: newX, y: newY });
       onMove?.(win.id, newX, newY);
     };
@@ -71,27 +84,13 @@ export const OSWindow: React.FC<OSWindowProps> = ({
 
   if (!win.isOpen || win.isMinimized) return null;
 
-  const style: React.CSSProperties = win.isMaximized
-    ? {
-        position: 'absolute',
-        top: '8px',
-        left: '10px',
-        right: '10px',
-        bottom: '48px',
-        width: 'calc(100% - 20px)',
-        height: 'calc(100% - 56px)',
-        zIndex: win.zIndex,
-      }
+  const style: React.CSSProperties = isMobile
+    ? { position: 'absolute', inset: 0, width: '100%', height: '100%', zIndex: win.zIndex }
+    : win.isMaximized
+    ? { position: 'absolute', top: 8, left: 8, width: 'calc(100% - 16px)', height: 'calc(100% - 16px)', zIndex: win.zIndex }
     : pos.x !== 0 || pos.y !== 0
-    ? {
-        position: 'absolute',
-        left: `${pos.x}px`,
-        top: `${pos.y}px`,
-        zIndex: win.zIndex,
-      }
-    : {
-        zIndex: win.zIndex,
-      };
+    ? { position: 'absolute', left: pos.x, top: pos.y, width: 'min(' + win.width + 'px, 100%)', height: 'min(' + win.height + 'px, 100%)', zIndex: win.zIndex }
+    : { zIndex: win.zIndex };
 
   return (
     <section
@@ -100,7 +99,7 @@ export const OSWindow: React.FC<OSWindowProps> = ({
       onClick={() => onFocus(win.id)}
       className={`bg-[#FCFCFD]/95 backdrop-blur-md rounded-2xl border border-white/90 overflow-hidden flex flex-col transition-shadow duration-150 shadow-2xl ${
         isActive ? 'ring-1 ring-white/90 shadow-[0_12px_36px_rgba(30,60,80,0.18)]' : 'shadow-[0_8px_24px_rgba(0,0,0,0.08)] opacity-95'
-      } ${!win.isMaximized && pos.x === 0 && pos.y === 0 ? defaultPositionClasses : ''} ${className}`}
+      } ${!isMobile && !win.isMaximized && pos.x === 0 && pos.y === 0 ? defaultPositionClasses : ''} ${className}`}
     >
       {/* XP/Modern Hybrid Titlebar */}
       <header
@@ -122,7 +121,7 @@ export const OSWindow: React.FC<OSWindowProps> = ({
         <div className="flex items-center space-x-1.5 z-10">
           <button
             type="button"
-            className="w-5 h-4.5 sm:w-6 sm:h-5 rounded-[4px] bg-[#E3EEF4] border border-[#ABC1CE] hover:bg-[#D5E5EE] active:scale-95 flex items-center justify-center text-[#2A4B59] transition"
+            className="w-9 h-9 rounded-[4px] bg-[#E3EEF4] border border-[#ABC1CE] hover:bg-[#D5E5EE] active:scale-95 flex items-center justify-center text-[#2A4B59] transition"
             onClick={(e) => {
               e.stopPropagation();
               playSound('click');
@@ -135,7 +134,7 @@ export const OSWindow: React.FC<OSWindowProps> = ({
 
           <button
             type="button"
-            className="w-5 h-4.5 sm:w-6 sm:h-5 rounded-[4px] bg-[#E3EEF4] border border-[#ABC1CE] hover:bg-[#D5E5EE] active:scale-95 flex items-center justify-center text-[#2A4B59] transition"
+            className="w-9 h-9 rounded-[4px] bg-[#E3EEF4] border border-[#ABC1CE] hover:bg-[#D5E5EE] active:scale-95 flex items-center justify-center text-[#2A4B59] transition"
             onClick={(e) => {
               e.stopPropagation();
               playSound('click');
@@ -155,7 +154,7 @@ export const OSWindow: React.FC<OSWindowProps> = ({
 
           <button
             type="button"
-            className="w-5 h-4.5 sm:w-6 sm:h-5 rounded-[4px] bg-gradient-to-b from-[#E78794] to-[#C85162] border border-[#9A303F] hover:brightness-110 active:scale-95 flex items-center justify-center text-white font-bold text-xs transition"
+            className="w-9 h-9 rounded-[4px] bg-gradient-to-b from-[#E78794] to-[#C85162] border border-[#9A303F] hover:brightness-110 active:scale-95 flex items-center justify-center text-white font-bold text-xs transition"
             onClick={(e) => {
               e.stopPropagation();
               playSound('click');
