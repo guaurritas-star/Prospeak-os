@@ -30,6 +30,9 @@ export async function POST(request: Request) {
     messages.push({role:m.role,text:m.text.trim()});
   }
   if (messages.at(-1)?.role!=='user') return json({error:'A user message is required.'},400);
+  // Remove the initial scripted Maya greeting: Gemini conversations begin with a user turn.
+  const firstUserIndex = messages.findIndex(m => m.role === 'user');
+  const conversation = messages.slice(firstUserIndex);
   // Pilot-only starter: do not expose this anonymously at scale.
   // Before public deployment, enforce authenticated sessions, centralized rate limits and spend caps.
   const instruction = [
@@ -46,7 +49,7 @@ export async function POST(request: Request) {
     const ai=new GoogleGenAI({apiKey:process.env.GEMINI_API_KEY});
     const result=await ai.models.generateContent({
       model:process.env.GEMINI_MODEL || 'gemini-2.5-flash',
-      contents:messages.map(m=>({role:m.role,parts:[{text:m.text}]})),
+      contents:conversation.map(m=>({role:m.role,parts:[{text:m.text}]})),
       config:{systemInstruction:instruction,maxOutputTokens:220,temperature:0.65},
     });
     const reply=result.text?.trim();
