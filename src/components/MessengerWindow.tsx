@@ -3,6 +3,7 @@ import { ChatMessage } from '../types/os';
 import { playSound, speakText } from '../utils/audio';
 import { ProSpeakIcon } from './ProSpeakIcon';
 import { Lightbulb, CalendarClock, Handshake, Volume2, Mic, Square } from 'lucide-react';
+import { askMaya, isMayaAIConfigured } from '../utils/ai';
 
 interface MessengerWindowProps {
   initialPrompt?: string;
@@ -18,13 +19,15 @@ export const MessengerWindow: React.FC<MessengerWindowProps> = ({
       id: 'm1',
       sender: 'maya',
       text: "Hi! Ready to practice for your meeting? What would you like to focus on today?",
-      tips: 'Choose a situation: introductions, meetings, or expressing opinions. Maya uses scripted prompts in this prototype.',
+      tips: isMayaAIConfigured ? 'AI conversation pilot. Avoid sensitive information.' : 'Guided scripted practice; AI is not connected yet.',
     },
   ]);
   const [inputText, setInputText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [micIssue, setMicIssue] = useState('');
+  const [aiIssue, setAiIssue] = useState('');
+  const sendingRef = useRef(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const speechRecognitionRef = useRef<any>(null);
 
@@ -76,34 +79,39 @@ export const MessengerWindow: React.FC<MessengerWindowProps> = ({
     };
   };
 
-  const handleSend = (textToSend?: string) => {
-    const text = (textToSend || inputText).trim();
-    if (!text) return;
 
+  const handleSend = async (textToSend?: string) => {
+    const text = (textToSend || inputText).trim().slice(0,1000);
+    if (!text || sendingRef.current) return;
+    sendingRef.current = true;
+    setAiIssue('');
     playSound('click');
-    const userMsg: ChatMessage = {
-      id: `usr_${Date.now()}`,
-      sender: 'user',
-      text,
-    };
-
-    setMessages((prev) => [...prev, userMsg]);
+    const userMsg: ChatMessage = { id: 'usr_' + Date.now(), sender:'user', text };
+    const history = [...messages,userMsg];
+    setMessages(history);
     setInputText('');
     setIsTyping(true);
-
-    setTimeout(() => {
-      const resp = generateMayaResponse(text);
+    try {
+      let responseText: string;
+      let responseTips: string | undefined;
+      if (isMayaAIConfigured) {
+        responseText = await askMaya(history);
+      } else {
+        const scripted = generateMayaResponse(text);
+        responseText = scripted.text;
+        responseTips = scripted.tips;
+      }
       const mayaMsg: ChatMessage = {
-        id: `maya_${Date.now()}`,
-        sender: 'maya',
-        text: resp.text,
-        tips: resp.tips,
+        id:'maya_'+Date.now(),sender:'maya',text:responseText,tips:responseTips,
       };
-      setMessages((prev) => [...prev, mayaMsg]);
-      setIsTyping(false);
+      setMessages(prev=>[...prev,mayaMsg]);
       playSound('ding');
-      speakText(resp.text);
-    }, 1200);
+    } catch (err) {
+      setAiIssue(err instanceof Error ? err.message : 'Service temporarily unavailable.');
+    } finally {
+      sendingRef.current=false;
+      setIsTyping(false);
+    }
   };
 
   const handleClear = () => {
@@ -139,7 +147,7 @@ export const MessengerWindow: React.FC<MessengerWindowProps> = ({
             const transcript = e.results[0][0].transcript;
             setInputText(transcript);
             setIsRecording(false);
-            handleSend(transcript);
+            // Keep transcript editable; require user to press Send.
           };
           rec.onerror = () => setIsRecording(false);
           rec.onend = () => setIsRecording(false);
@@ -168,7 +176,7 @@ export const MessengerWindow: React.FC<MessengerWindowProps> = ({
           </div>
           <div>
             <h4 className="font-bold text-[#1E3B46] leading-tight">Maya</h4>
-            <span className="text-[10px] text-gray-500">Scripted Practice · Demo</span>
+            <span className="text-[10px] text-gray-500">{isMayaAIConfigured ? 'AI Conversation · Pilot' : 'Guided Practice · Demo'}</span>
           </div>
         </div>
 
@@ -181,6 +189,10 @@ export const MessengerWindow: React.FC<MessengerWindowProps> = ({
         </button>
       </div>
 
+      <p className="px-3 py-1.5 text-[11px] bg-[#EFF5F7] text-[#526E7D] border-b border-[#E0EBEF]">
+        {isMayaAIConfigured ? 'AI mode: messages you send are processed by an AI provider. Avoid sensitive details.' : 'Guided practice mode: Maya uses prepared scenarios. AI connection pending.'}
+      </p>
+      {aiIssue && <div role="alert" className="bg-[#F9EDEF] text-[#864F5A] px-3 py-2 text-xs">AI unavailable: {aiIssue} Your message was not answered. Please try again.</div>}
       {/* Messages Scroll Area */}
       <div className="flex-1 overflow-y-auto p-3.5 space-y-3">
         {messages.map((msg) => (
@@ -284,7 +296,7 @@ export const MessengerWindow: React.FC<MessengerWindowProps> = ({
 
         <button
           onClick={() => handleSend()}
-          disabled={!inputText.trim()}
+          disabled={!inputText.trim() || isTyping}
           className="px-3 py-2 rounded-xl bg-[#294B59] hover:bg-[#1E3B46] disabled:opacity-40 text-white font-semibold text-xs transition active:scale-95"
           title="Send Message"
         >
