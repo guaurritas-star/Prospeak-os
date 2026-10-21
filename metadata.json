@@ -1,0 +1,6 @@
+{
+  "name": "ProSpeak OS",
+  "description": "An interactive desktop OS environment for mastering professional English through realistic workplace missions, AI conversation partners, speech labs, and real-time feedback.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

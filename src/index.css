@@ -1,0 +1,114 @@
+@import "tailwindcss";
+
+@layer theme {
+  :root {
+    --font-sans: "Plus Jakarta Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --font-serif: "Newsreader", Georgia, Cambria, serif;
+    --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    --font-handwriting: "Caveat", cursive;
+  }
+}
+
+body {
+  font-family: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+  user-select: none;
+  -webkit-user-select: none;
+  background-color: #dbeaf4;
+  overflow: hidden;
+}
+
+.font-handwriting {
+  font-family: var(--font-handwriting), "Caveat", cursive;
+}
+
+.font-serif {
+  font-family: var(--font-serif), "Newsreader", serif;
+}
+
+.font-mono {
+  font-family: var(--font-mono), monospace;
+}
+
+.scenic-landscape-bg {
+  pointer-events: none;
+  mix-blend-mode: multiply;
+  opacity: 0.88;
+  background-image: 
+    radial-gradient(circle at 50% 18%, #ffffffa6 0%, #0000 40%),
+    radial-gradient(circle at 82% 22%, #ffebe68c 0%, #0000 35%),
+    radial-gradient(circle at 20% 25%, #fff9 0%, #0000 30%),
+    linear-gradient(135deg, #0000 60%, #62808947 60%),
+    linear-gradient(-140deg, #0000 65%, #74887959 65%),
+    linear-gradient(172deg, #0000 62%, #55726b52 75%),
+    linear-gradient(#0000 35%, #96afaa26 65%, #324b4673 100%);
+  position: absolute;
+  inset: 0;
+}
+
+.theme-forest .scenic-landscape-bg {
+  background-image: 
+    radial-gradient(circle at 50% 18%, #e8f5e9a6 0%, #0000 40%),
+    radial-gradient(circle at 82% 22%, #e0f2f18c 0%, #0000 35%),
+    linear-gradient(135deg, #0000 60%, #3d604b47 60%),
+    linear-gradient(-140deg, #0000 65%, #2d5a3f59 65%),
+    linear-gradient(#0000 35%, #81c78426 65%, #1b382b73 100%);
+}
+
+.theme-sand .scenic-landscape-bg {
+  background-image: 
+    radial-gradient(circle at 50% 18%, #fff8e1a6 0%, #0000 40%),
+    radial-gradient(circle at 82% 22%, #ffe0b28c 0%, #0000 35%),
+    linear-gradient(135deg, #0000 60%, #8d6e6347 60%),
+    linear-gradient(-140deg, #0000 65%, #a1887f59 65%),
+    linear-gradient(#0000 35%, #ffcc8026 65%, #4e342e73 100%);
+}
+
+.theme-obsidian .scenic-landscape-bg {
+  background-image: 
+    radial-gradient(circle at 50% 18%, #374151a6 0%, #0000 40%),
+    radial-gradient(circle at 82% 22%, #4b55638c 0%, #0000 35%),
+    linear-gradient(135deg, #0000 60%, #1f293747 60%),
+    linear-gradient(-140deg, #0000 65%, #11182759 65%),
+    linear-gradient(#0000 35%, #37415126 65%, #0f172a73 100%);
+}
+
+.xp-titlebar-gradient {
+  background: linear-gradient(#fffffff2 0%, #ebf3f8eb 20%, #c3d9e6eb 48%, #b0cadaf2 52%, #c6deebfa 100%);
+  border-bottom: 1px solid #8eacbebf;
+}
+
+.xp-titlebar-active {
+  background: linear-gradient(#fffffffa 0%, #e0eff9f2 24%, #b6d3e4f2 50%, #a4c4d8fa 52%, #c0dcec 100%);
+  border-bottom: 1px solid #789bafe6;
+}
+
+.start-btn-gradient {
+  background: linear-gradient(#3d6b78 0%, #2a4e58 48%, #1e3b44 52%, #244550 100%);
+  border: 1px solid #14282f;
+  box-shadow: inset 0 1px #ffffff73, 0 2px 5px #00000047;
+}
+
+.start-btn-gradient:hover {
+  background: linear-gradient(#497c8b 0%, #335b67 48%, #24444e 52%, #2e5460 100%);
+}
+
+.start-btn-gradient:active {
+  background: linear-gradient(#24444e 0%, #1e3b44 48%, #2a4e58 52%, #3d6b78 100%);
+  box-shadow: inset 0 1px 3px #00000080;
+}
+
+/* Custom subtle scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.03);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.18);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.32);
+}
