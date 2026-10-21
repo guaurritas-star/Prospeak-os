@@ -1,4 +1,5 @@
 import React from 'react';
+import { ProSpeakIcon } from './ProSpeakIcon';
 import { playSound } from '../utils/audio';
 
 interface LogOffModalProps {
@@ -20,7 +21,7 @@ export const LogOffModal: React.FC<LogOffModalProps> = ({
         {/* Title bar */}
         <div className="xp-titlebar-active p-3.5 flex items-center justify-between border-b border-[#BED4E2]">
           <div className="flex items-center space-x-2">
-            <span className="text-base">🦎</span>
+            <ProSpeakIcon name="mission" size={22} />
             <span className="font-bold text-xs text-[#1B3642]">Log Off ProSpeak OS</span>
           </div>
           <button
