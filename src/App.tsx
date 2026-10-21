@@ -33,7 +33,7 @@ export default function App() {
       id: 'messenger',
       title: 'Messenger',
       icon: '💬',
-      isOpen: true,
+      isOpen: false,
       isMinimized: false,
       isMaximized: false,
       zIndex: 20,
@@ -46,7 +46,7 @@ export default function App() {
       id: 'progress',
       title: 'My Progress',
       icon: '📊',
-      isOpen: true,
+      isOpen: false,
       isMinimized: false,
       isMaximized: false,
       zIndex: 10,
@@ -218,8 +218,8 @@ export default function App() {
             AR
           </div>
           <div>
-            <h2 className="text-xl font-serif font-bold text-[#1E3B46]">Alex Rivera</h2>
-            <p className="text-xs text-[#52707D]">ProSpeak Scholar (Level 4)</p>
+            <h2 className="text-xl font-serif font-bold text-[#1E3B46]">Guest Learner</h2>
+            <p className="text-xs text-[#52707D]">ProSpeak Guest · Prototype</p>
           </div>
           <button
             onClick={() => {
@@ -290,12 +290,12 @@ export default function App() {
       {/* Desktop Workspace */}
       <main
         data-purpose="desktop-workspace"
-        className="relative w-full h-[calc(100vh-42px)] p-4 sm:p-6 overflow-hidden flex"
+        className="relative w-full h-[calc(100vh-42px)] p-2 sm:p-6 overflow-hidden flex"
       >
         {/* Desktop Shortcuts Sidebar */}
         <nav
           aria-label="Desktop Shortcuts"
-          className="w-20 sm:w-28 flex flex-col space-y-3 sm:space-y-4 pt-16 sm:pt-20 z-10 select-none flex-shrink-0"
+          className={(Object.values(windows).some(w => w.isOpen && !w.isMinimized) ? 'hidden sm:flex ' : 'flex ') + 'w-20 sm:w-28 flex-col space-y-3 sm:space-y-4 pt-16 sm:pt-20 z-10 select-none flex-shrink-0'}
         >
           {/* Inbox Shortcut */}
           <button
@@ -389,7 +389,7 @@ export default function App() {
         </nav>
 
         {/* Windows Container */}
-        <div className="relative flex-1 h-full ml-2 sm:ml-4 overflow-hidden" id="window-container">
+        <div className="relative flex-1 min-w-0 h-full sm:ml-4 overflow-hidden" id="window-container">
           {/* Mission Window */}
           <OSWindow
             window={windows.mission}
@@ -399,7 +399,7 @@ export default function App() {
             onMaximize={maximizeWindow}
             onClose={closeWindow}
             onMove={moveWindow}
-            defaultPositionClasses="absolute left-2 sm:left-4 top-1 sm:top-2 w-[59%] min-w-[700px] max-w-[850px] h-[calc(100vh-120px)] max-h-[740px]"
+            defaultPositionClasses="absolute left-2 top-2 w-[calc(100%-16px)] h-[calc(100%-16px)]"
           >
             <MissionWindow
               onOpenAgendaModal={() => setIsAgendaModalOpen(true)}
@@ -419,7 +419,7 @@ export default function App() {
             onMaximize={maximizeWindow}
             onClose={closeWindow}
             onMove={moveWindow}
-            defaultPositionClasses="absolute right-2 sm:right-4 top-1 sm:top-2 w-[38%] min-w-[380px] max-w-[460px] h-[385px]"
+            defaultPositionClasses="absolute right-2 top-2 w-[min(440px,calc(100%-16px))] h-[385px] max-h-[calc(100%-16px)]"
           >
             <MessengerWindow
               initialPrompt={initialMayaPrompt}
@@ -436,7 +436,7 @@ export default function App() {
             onMaximize={maximizeWindow}
             onClose={closeWindow}
             onMove={moveWindow}
-            defaultPositionClasses="absolute right-2 sm:right-4 bottom-1 sm:bottom-2 w-[38%] min-w-[380px] max-w-[460px] h-[310px]"
+            defaultPositionClasses="absolute right-2 bottom-2 w-[min(440px,calc(100%-16px))] h-[360px] max-h-[calc(100%-16px)]"
           >
             <ProgressWindow />
           </OSWindow>
