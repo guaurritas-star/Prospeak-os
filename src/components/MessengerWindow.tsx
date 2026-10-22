@@ -3,7 +3,7 @@ import { ChatMessage } from '../types/os';
 import { playSound, speakText } from '../utils/audio';
 import { ProSpeakIcon } from './ProSpeakIcon';
 import { Lightbulb, CalendarClock, Handshake, Volume2, Mic, Square } from 'lucide-react';
-import { askMaya, isMayaAIConfigured, mayaTurnstileSiteKey } from '../utils/ai';
+import { askMaya, getMayaStatus, startMayaSession, isMayaAIConfigured, mayaTurnstileSiteKey } from '../utils/ai';
 import { MayaVerification } from './MayaVerification';
 
 interface MessengerWindowProps {
@@ -20,7 +20,7 @@ export const MessengerWindow: React.FC<MessengerWindowProps> = ({
       id: 'm1',
       sender: 'maya',
       text: "Hi! Ready to practice for your meeting? What would you like to focus on today?",
-      tips: isMayaAIConfigured ? 'AI conversation pilot. Avoid sensitive information.' : 'Guided scripted practice; AI is not connected yet.',
+      tips: 'Choose a topic or share what you want to practice.',
     },
   ]);
   const [inputText, setInputText] = useState('');
@@ -29,10 +29,50 @@ export const MessengerWindow: React.FC<MessengerWindowProps> = ({
   const [micIssue, setMicIssue] = useState('');
   const [aiIssue, setAiIssue] = useState('');
   const [verificationToken, setVerificationToken] = useState('');
+  const [sessionToken, setSessionToken] = useState('');
+  const [sessionExpiresAt, setSessionExpiresAt] = useState(0);
+  const [sessionChecking, setSessionChecking] = useState(false);
+  const [aiStatus, setAiStatus] = useState<'checking'|'ready'|'guided'>(isMayaAIConfigured?'checking':'guided');
   const [challengeVersion, setChallengeVersion] = useState(0);
   const sendingRef = useRef(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const speechRecognitionRef = useRef<any>(null);
+
+  // If Gemini is disabled, explicitly show scripted mode instead of claiming to be an AI.
+  useEffect(() => {
+    if(!isMayaAIConfigured)return;
+    const controller=new AbortController();
+    getMayaStatus(controller.signal)
+      .then(ready=>{if(!controller.signal.aborted)setAiStatus(ready?'ready':'guided');})
+      .catch(()=>{if(!controller.signal.aborted)setAiStatus('guided');});
+    return ()=>controller.abort();
+  },[]);
+
+  // Turnstile is redeemed once when opening a protected session, not for every message.
+  useEffect(()=>{
+    if(aiStatus!=='ready'||!verificationToken)return;
+    const controller=new AbortController();
+    setSessionChecking(true);
+    startMayaSession(verificationToken,controller.signal)
+      .then(result=>{
+        if(controller.signal.aborted)return;
+        setSessionToken(result.token);
+        setSessionExpiresAt(Date.now()+result.expiresIn*1000);
+        setAiIssue('');
+      })
+      .catch(err=>{
+        if(controller.signal.aborted)return;
+        setAiIssue(err instanceof Error?err.message:'Could not verify this session.');
+        setVerificationToken('');
+        setChallengeVersion(v=>v+1);
+      })
+      .finally(()=>{if(!controller.signal.aborted)setSessionChecking(false);});
+    return ()=>controller.abort();
+  },[verificationToken,aiStatus]);
+
+  const canChatWithAI = aiStatus==='ready';
+  const hasCurrentSession = !!sessionToken && sessionExpiresAt>Date.now()+5000;
+
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -86,9 +126,16 @@ export const MessengerWindow: React.FC<MessengerWindowProps> = ({
   const handleSend = async (textToSend?: string) => {
     const text = (textToSend || inputText).trim().slice(0,1000);
     if (!text || sendingRef.current) return;
-    if(isMayaAIConfigured && !verificationToken){
+    if(aiStatus==='checking'){
+      setAiIssue('Checking Maya connection. Please try again in a moment.');
+      return;
+    }
+    if(canChatWithAI && !hasCurrentSession){
       setInputText(text);
-      setAiIssue('Complete the verification before sending.');
+      setSessionToken('');
+      setVerificationToken('');
+      setChallengeVersion(v=>v+1);
+      setAiIssue('Please complete the one-time security check to begin chatting.');
       return;
     }
     sendingRef.current = true;
@@ -102,8 +149,8 @@ export const MessengerWindow: React.FC<MessengerWindowProps> = ({
     try {
       let responseText: string;
       let responseTips: string | undefined;
-      if (isMayaAIConfigured) {
-        responseText = await askMaya(history,{turnstileToken:verificationToken});
+      if (canChatWithAI) {
+        responseText = await askMaya(history,sessionToken);
       } else {
         const scripted = generateMayaResponse(text);
         responseText = scripted.text;
@@ -115,15 +162,15 @@ export const MessengerWindow: React.FC<MessengerWindowProps> = ({
       setMessages(prev=>[...prev,mayaMsg]);
       playSound('ding');
     } catch (err) {
+      if(err instanceof Error && err.name==='SessionExpiredError'){
+        setSessionToken('');setVerificationToken('');setSessionExpiresAt(0);
+        setChallengeVersion(v=>v+1);
+      }
       setAiIssue(err instanceof Error ? err.message : 'Service temporarily unavailable.');
       // Keep the draft and remove the unanswered bubble so students can retry.
       setInputText(text);
       setMessages(prev=>prev.filter(m=>m.id!==userMsg.id));
     } finally {
-      if(isMayaAIConfigured){
-        setVerificationToken('');
-        setChallengeVersion(v=>v+1);
-      }
       sendingRef.current=false;
       setIsTyping(false);
     }
@@ -191,7 +238,7 @@ export const MessengerWindow: React.FC<MessengerWindowProps> = ({
           </div>
           <div>
             <h4 className="font-bold text-[#1E3B46] leading-tight">Maya</h4>
-            <span className="text-[10px] text-gray-500">{isMayaAIConfigured ? 'AI Conversation · Gemini' : 'Guided Practice · Demo'}</span>
+            <span className="text-[10px] text-gray-500">{aiStatus==='ready' ? 'AI Conversation · Gemini' : aiStatus==='checking' ? 'Connecting…' : 'Guided Practice · Demo'}</span>
           </div>
         </div>
 
@@ -205,7 +252,7 @@ export const MessengerWindow: React.FC<MessengerWindowProps> = ({
       </div>
 
       <p className="px-3 py-1.5 text-[11px] bg-[#EFF5F7] text-[#526E7D] border-b border-[#E0EBEF]">
-        {isMayaAIConfigured ? 'AI mode: messages you send are processed by an AI provider. Avoid sensitive details.' : 'Guided practice mode: Maya uses prepared scenarios. AI connection pending.'}
+        {aiStatus==='ready' ? 'Gemini is available. You are protected by a short, verified session. Avoid sensitive details.' : aiStatus==='checking' ? 'Checking Gemini availability…' : 'Gemini is not active yet. You can practice with guided scenarios while the service is being enabled.'}
       </p>
       {aiIssue && <div role="alert" className="bg-[#F9EDEF] text-[#864F5A] px-3 py-2 text-xs">AI unavailable: {aiIssue} Your message was not answered. Please try again.</div>}
       {/* Messages Scroll Area */}
@@ -284,8 +331,13 @@ export const MessengerWindow: React.FC<MessengerWindowProps> = ({
         </button>
       </div>
 
-      {isMayaAIConfigured && <MayaVerification siteKey={mayaTurnstileSiteKey}
-        onToken={setVerificationToken} refreshKey={challengeVersion}/>}
+      {canChatWithAI && !hasCurrentSession && !sessionChecking &&
+        <MayaVerification siteKey={mayaTurnstileSiteKey}
+          onToken={setVerificationToken} refreshKey={challengeVersion}/>}
+      {canChatWithAI && (hasCurrentSession || sessionChecking) &&
+        <div role="status" className="px-3 py-1 text-[11px] text-[#4A7868] border-t border-[#DFE9EE] bg-[#F3F8F5]">
+          {sessionChecking ? 'Securing conversation…' : 'Protected conversation · Ready to chat'}
+        </div>}}
       {micIssue && <p role="status" className="text-xs px-3 py-2 bg-[#F8EBEF] text-[#7C4655]">{micIssue}</p>}
 
       {/* Input bar */}
@@ -313,7 +365,7 @@ export const MessengerWindow: React.FC<MessengerWindowProps> = ({
 
         <button
           onClick={() => handleSend()}
-          disabled={!inputText.trim() || isTyping || (isMayaAIConfigured && !verificationToken)}
+          disabled={!inputText.trim() || isTyping || aiStatus==='checking' || (canChatWithAI && !hasCurrentSession)}
           className="px-3 py-2 rounded-xl bg-[#294B59] hover:bg-[#1E3B46] disabled:opacity-40 text-white font-semibold text-xs transition active:scale-95"
           title="Send Message"
         >
