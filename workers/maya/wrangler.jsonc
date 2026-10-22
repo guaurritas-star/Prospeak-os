@@ -5,7 +5,6 @@
   "workers_dev": true,
   "vars": {
     "ALLOWED_ORIGIN": "https://guaurritas-star.github.io",
-    "MAYA_ENABLED": "false",
     "GEMINI_MODEL": "gemini-2.5-flash"
   },
   "ratelimits": [
