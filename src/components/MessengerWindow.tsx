@@ -5,7 +5,6 @@ import { ProSpeakIcon } from './ProSpeakIcon';
 import { Lightbulb, CalendarClock, Handshake, Volume2, Mic, Square } from 'lucide-react';
 import { askMaya, isMayaAIConfigured, mayaTurnstileSiteKey } from '../utils/ai';
 import { MayaVerification } from './MayaVerification';
-import { ShieldCheck } from 'lucide-react';
 
 interface MessengerWindowProps {
   initialPrompt?: string;
@@ -29,7 +28,6 @@ export const MessengerWindow: React.FC<MessengerWindowProps> = ({
   const [isRecording, setIsRecording] = useState(false);
   const [micIssue, setMicIssue] = useState('');
   const [aiIssue, setAiIssue] = useState('');
-  const [pilotCode, setPilotCode] = useState('');
   const [verificationToken, setVerificationToken] = useState('');
   const [challengeVersion, setChallengeVersion] = useState(0);
   const sendingRef = useRef(false);
@@ -88,9 +86,9 @@ export const MessengerWindow: React.FC<MessengerWindowProps> = ({
   const handleSend = async (textToSend?: string) => {
     const text = (textToSend || inputText).trim().slice(0,1000);
     if (!text || sendingRef.current) return;
-    if(isMayaAIConfigured && (!pilotCode.trim() || !verificationToken)){
+    if(isMayaAIConfigured && !verificationToken){
       setInputText(text);
-      setAiIssue('Enter the class access code and complete verification before sending.');
+      setAiIssue('Complete the verification before sending.');
       return;
     }
     sendingRef.current = true;
@@ -105,7 +103,7 @@ export const MessengerWindow: React.FC<MessengerWindowProps> = ({
       let responseText: string;
       let responseTips: string | undefined;
       if (isMayaAIConfigured) {
-        responseText = await askMaya(history,{accessCode:pilotCode.trim(),turnstileToken:verificationToken});
+        responseText = await askMaya(history,{turnstileToken:verificationToken});
       } else {
         const scripted = generateMayaResponse(text);
         responseText = scripted.text;
@@ -193,7 +191,7 @@ export const MessengerWindow: React.FC<MessengerWindowProps> = ({
           </div>
           <div>
             <h4 className="font-bold text-[#1E3B46] leading-tight">Maya</h4>
-            <span className="text-[10px] text-gray-500">{isMayaAIConfigured ? 'AI Conversation · Pilot' : 'Guided Practice · Demo'}</span>
+            <span className="text-[10px] text-gray-500">{isMayaAIConfigured ? 'AI Conversation · Gemini' : 'Guided Practice · Demo'}</span>
           </div>
         </div>
 
@@ -286,18 +284,6 @@ export const MessengerWindow: React.FC<MessengerWindowProps> = ({
         </button>
       </div>
 
-      {isMayaAIConfigured && (
-        <section aria-label="Class pilot access" className="px-3 py-2 border-t border-[#DFE9EE] bg-[#F8FAFB] space-y-2">
-          <label className="flex items-center gap-2 text-xs font-semibold text-[#294B59]" htmlFor="maya-pilot-code">
-            <ShieldCheck size={16}/> ProSpeak pilot access code
-          </label>
-          <input id="maya-pilot-code" type="password" autoComplete="off" value={pilotCode}
-            onChange={e=>setPilotCode(e.target.value)} maxLength={128}
-            className="w-full rounded-lg border border-[#B6CED8] px-3 py-2 text-base"
-            placeholder="Provided by your ProSpeak teacher"/>
-          <p className="text-[11px] text-[#586F7B]">Only share practice messages. Don't include private workplace or personal information.</p>
-        </section>
-      )}
       {isMayaAIConfigured && <MayaVerification siteKey={mayaTurnstileSiteKey}
         onToken={setVerificationToken} refreshKey={challengeVersion}/>}
       {micIssue && <p role="status" className="text-xs px-3 py-2 bg-[#F8EBEF] text-[#7C4655]">{micIssue}</p>}
@@ -327,7 +313,7 @@ export const MessengerWindow: React.FC<MessengerWindowProps> = ({
 
         <button
           onClick={() => handleSend()}
-          disabled={!inputText.trim() || isTyping || (isMayaAIConfigured && (!pilotCode.trim() || !verificationToken))}
+          disabled={!inputText.trim() || isTyping || (isMayaAIConfigured && !verificationToken)}
           className="px-3 py-2 rounded-xl bg-[#294B59] hover:bg-[#1E3B46] disabled:opacity-40 text-white font-semibold text-xs transition active:scale-95"
           title="Send Message"
         >
