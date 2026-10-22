@@ -1,0 +1,73 @@
+name: Deploy Maya Worker from GitHub
+
+on:
+  workflow_dispatch:
+    inputs:
+      activate_maya:
+        description: 'Enable Gemini calls for the protected pilot (only after checking access and quotas)'
+        required: true
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: maya-cloudflare-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout reviewed repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Check required GitHub Secrets without printing values
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          TURNSTILE_SECRET_KEY: ${{ secrets.TURNSTILE_SECRET_KEY }}
+          PILOT_ACCESS_CODE: ${{ secrets.PILOT_ACCESS_CODE }}
+        run: |
+          set -euo pipefail
+          for name in CLOUDFLARE_API_TOKEN CLOUDFLARE_ACCOUNT_ID GEMINI_API_KEY TURNSTILE_SECRET_KEY PILOT_ACCESS_CODE; do
+            if [[ -z "${!name:-}" ]]; then
+              echo "::error::Missing repository secret: $name"
+              exit 1
+            fi
+          done
+          if [[ ${#PILOT_ACCESS_CODE} -lt 12 ]]; then
+            echo '::error::PILOT_ACCESS_CODE must contain at least 12 characters.'
+            exit 1
+          fi
+
+      - name: Deploy Cloudflare Worker with server-side secrets
+        uses: cloudflare/wrangler-action@953926a2e2182532811c01a25e53647d93bf07c0 # v4, pinned
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: workers/maya
+          wranglerVersion: '4.136.3'
+          command: deploy
+          secrets: |
+            GEMINI_API_KEY
+            TURNSTILE_SECRET_KEY
+            PILOT_ACCESS_CODE
+            MAYA_ENABLED
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          TURNSTILE_SECRET_KEY: ${{ secrets.TURNSTILE_SECRET_KEY }}
+          PILOT_ACCESS_CODE: ${{ secrets.PILOT_ACCESS_CODE }}
+          MAYA_ENABLED: ${{ inputs.activate_maya && 'true' || 'false' }}
+
+      - name: Explain next steps
+        run: |
+          echo 'Cloudflare deploy requested. Copy the workers.dev URL from the previous step.'
+          echo 'Set PROSPEAK_AI_API_URL and PROSPEAK_TURNSTILE_SITE_KEY as public repository variables.'
+          echo 'Then manually rebuild the existing GitHub Pages workflow.'
