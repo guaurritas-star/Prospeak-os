@@ -9,7 +9,7 @@ const env=(extra={})=>({
   GEMINI_API_KEY:'fake-private-key',
   TURNSTILE_SECRET_KEY:'fake-turnstile-key',
   ALLOWED_ORIGIN:origin,
-  GEMINI_MODEL:'gemini-2.5-flash',
+  GEMINI_MODEL:'gemini-3.5-flash-lite',
   MAYA_LIMITER:{limit:async()=>({success:true})},
   MAYA_GLOBAL_LIMITER:{limit:async()=>({success:true})},
   ...extra,
@@ -71,7 +71,9 @@ test('validated session works for multiple messages without another Turnstile ch
     modelRequests++;
     const body=JSON.parse(init.body);
     assert.match(body.systemInstruction.parts[0].text,/actual message/);
-    assert.equal(body.generationConfig.thinkingConfig.thinkingBudget,0);
+    assert.equal(body.generationConfig.thinkingConfig,undefined);
+    assert.equal(body.generationConfig.maxOutputTokens,900);
+    assert.match(String(target),/gemini-3\.5-flash-lite/);
     assert.equal(init.headers['x-goog-api-key'],'fake-private-key');
     return Response.json({candidates:[{content:{parts:[{text:'That sounds great! What kind of clients do you work with?'}]}}]});
   },async()=>{
@@ -95,4 +97,33 @@ test('signed sessions are bound to the original IP',async()=>{
     const failed=await worker.fetch(request('/api/chat',{sessionToken:token,...message},origin,'203.0.113.2'),env());
     assert.equal(failed.status,401);
   });
+});
+
+test('Gemini provider status returns a safe and helpful diagnostic without leaking secrets',async()=>{
+  const scenarios=[
+    [400,'GEMINI_BAD_REQUEST'],
+    [401,'GEMINI_AUTH'],
+    [403,'GEMINI_PERMISSION'],
+    [404,'GEMINI_MODEL'],
+    [429,'GEMINI_QUOTA'],
+    [503,'GEMINI_UPSTREAM'],
+  ];
+  const originalWarn=console.warn;
+  console.warn=()=>{};
+  try {
+    for(const [status,expectedCode] of scenarios){
+      await withStub(async target=>{
+        if(String(target).includes('siteverify'))return Response.json({success:true,hostname:'guaurritas-star.github.io',action:'maya_chat'});
+        return Response.json({error:{status:'SAMPLE',message:'private-placeholder'}},{status});
+      },async()=>{
+        const session=await worker.fetch(request('/api/session',{turnstileToken:'fake'}),env());
+        const {token}=await session.json();
+        const response=await worker.fetch(request('/api/chat',{...message,sessionToken:token}),env());
+        assert.equal(response.status,502);
+        const data=await response.json();
+        assert.equal(data.code,expectedCode);
+        assert.equal(data.error.includes('private-placeholder'),false);
+      });
+    }
+  }finally{console.warn=originalWarn;}
 });
