@@ -1,58 +1,70 @@
-# Maya en GitHub Secrets — configuración simplificada
+# ProSpeak OS — Gemini con Cloudflare desde GitHub (sin código piloto)
 
-**Sí, las claves pueden almacenarse en GitHub Actions Secrets** sin quedar visibles en la página. Los secretos se usan para **desplegar** un Worker de Cloudflare: GitHub Pages por sí mismo es estático y no puede ejecutar Gemini con una clave oculta cuando el alumno escribe.
+ProSpeak OS sigue alojado en GitHub Pages. El Worker de Cloudflare aloja únicamente la API privada de Maya. No uses la clave Gemini en `VITE_*`, código público ni capturas.
 
-Este método evita el problema de Cloudflare `Missing git connection`. No hace falta conectar GitHub desde Cloudflare.
+## Seguridad actual
 
-## 1. Rotar la clave
+- **Ya no existe `PILOT_ACCESS_CODE`** ni una contraseña de acceso en Messenger.
+- La verificación Cloudflare Turnstile es obligatoria **antes de cada mensaje** y se comprueba en el servidor.
+- Límite aproximado de 6 solicitudes/minuto por IP y 15 solicitudes/minuto compartidas **por ubicación de Cloudflare** (no son límites globales estrictos).
+- CORS restringe el origen a `https://guaurritas-star.github.io`, pero CORS **no** autentica a usuarios.
+- `MAYA_ENABLED` se mantiene `false` en el primer despliegue automático para evitar consumo accidental.
+- **Sin código privado, cualquier visitante que complete Turnstile podrá usar Gemini una vez activado.** Controla la cuota y la facturación de tu cuenta de Google; para un lanzamiento público se requieren controles adicionales de abuso y gasto.
 
-La clave que se compartió anteriormente en el chat debe revocarse en Google AI Studio y reemplazarse por una nueva. **No envíes la nueva clave a ningún chat ni la pongas en el frontend.**
+**IMPORTANTE:** revoca cualquier clave Gemini que hayas compartido por chat y genera otra. No pegues la nueva aquí.
 
-## 2. Crear un token de Cloudflare (NO su integración con GitHub)
+## Paso 1 — Repository Secrets
 
-En https://dash.cloudflare.com/profile/api-tokens crea un API token con permisos mínimos para desplegar Workers (plantilla Edit Cloudflare Workers, restringida a la cuenta de Cloudflare donde estará el Worker).
+Abre: https://github.com/guaurritas-star/Prospeak-os/settings/secrets/actions
 
-Encuentra el **Account ID** de esa misma cuenta en Cloudflare. La cuenta debe tener un subdominio `workers.dev` habilitado; Cloudflare puede pedir que lo actives desde Workers & Pages una sola vez.
+Debes tener estos **cuatro** Repository Secrets (no Environment Secrets):
 
-## 3. Guardar cinco secretos en GitHub
+| Nombre | Valor |
+|---|---|
+| `CLOUDFLARE_API_TOKEN` | Token de Cloudflare con permisos de edición de Workers para tu cuenta |
+| `CLOUDFLARE_ACCOUNT_ID` | ID de esa cuenta de Cloudflare |
+| `GEMINI_API_KEY` | Clave privada **nueva** de Google AI Studio |
+| `TURNSTILE_SECRET_KEY` | Secret key privada del widget Turnstile |
 
-Ve a https://github.com/guaurritas-star/Prospeak-os/settings/secrets/actions → New repository secret y añade:
+No hace falta crear `PILOT_ACCESS_CODE`.
 
-| Secret name | Qué pegar |
-| --- | --- |
-| `CLOUDFLARE_API_TOKEN` | Token de Cloudflare con acceso limitado a Workers |
-| `CLOUDFLARE_ACCOUNT_ID` | ID de la cuenta Cloudflare |
-| `GEMINI_API_KEY` | Tu **nueva** clave Gemini |
-| `TURNSTILE_SECRET_KEY` | Secret key del widget Turnstile |
-| `PILOT_ACCESS_CODE` | Contraseña larga y única (12+ caracteres) para alumnos del piloto |
+## Paso 2 — Publicar el Worker desde GitHub Actions
 
-Para obtener Turnstile, crea un widget **Managed** en Cloudflare con hostname `guaurritas-star.github.io`. Conserva la **site key** pública para la sección 5. Los alumnos necesitarán realizar una verificación por mensaje.
+Abre: https://github.com/guaurritas-star/Prospeak-os/actions/workflows/deploy-maya-cloudflare.yml
 
-## 4. Desplegar desde GitHub (sin 'Git connection')
+- Cuando se publique un cambio de `workers/maya/**` o el workflow, GitHub intentará desplegar el Worker **desactivado** (secreto `MAYA_ENABLED=false`).
+- Si aún no está publicado o falló, entra a **Run workflow** → rama `main` → deja **activate_maya** sin marcar → **Run workflow**.
+- Abre el registro del paso **Deploy Cloudflare Worker** y copia la URL real `https://...workers.dev`. Si es la primera vez, Cloudflare puede pedir habilitar un subdominio `workers.dev` en Workers & Pages.
 
-Abre https://github.com/guaurritas-star/Prospeak-os/actions/workflows/deploy-maya-cloudflare.yml
+Este proceso usa GitHub Secrets para guardar la clave Gemini como **secreto de ejecución en Cloudflare**, sin Git connection. Comprueba que las acciones finalicen correctamente antes de activar llamadas de pago.
 
-Selecciona Run workflow, rama `main`, y deja **activate_maya = false** la primera vez. GitHub desplegará `workers/maya` e instalará las credenciales como secretos de ejecución en Cloudflare. La acción utiliza solamente el token de despliegue; no necesita instalar la app de GitHub en Cloudflare.
+## Paso 3 — Configurar las dos variables públicas del sitio
 
-Revisa que Actions termine en verde y copia la URL que aparezca terminada en `.workers.dev`. Si el subdominio workers.dev aún no existe, actívalo una vez en Cloudflare antes del despliegue.
+En https://github.com/guaurritas-star/Prospeak-os/settings/variables/actions (Repository Variables):
 
-## 5. Enlazar Maya desde GitHub Pages
+| Nombre | Valor |
+|---|---|
+| `PROSPEAK_AI_API_URL` | `https://TU-WORKER.TU-CUENTA.workers.dev/api/chat` (usa tu URL real) |
+| `PROSPEAK_TURNSTILE_SITE_KEY` | Site key **pública** del widget Turnstile |
 
-Ve a https://github.com/guaurritas-star/Prospeak-os/settings/variables/actions → New repository variable:
+El widget Turnstile debe autorizar el hostname `guaurritas-star.github.io`. No confundas Site key con Secret key.
 
-| Variable pública | Valor |
-| --- | --- |
-| `PROSPEAK_AI_API_URL` | `https://TU-WORKER.TU-CUENTA.workers.dev/api/chat` (URL real del despliegue) |
-| `PROSPEAK_TURNSTILE_SITE_KEY` | La site key pública de Turnstile (no la secret key) |
+Ejecuta el workflow https://github.com/guaurritas-star/Prospeak-os/actions/workflows/deploy-pages.yml → **Run workflow**. Así el frontend recibe las variables públicas. En ausencia de ellas, Maya permanece en Guided Practice.
 
-Después abre https://github.com/guaurritas-star/Prospeak-os/actions/workflows/deploy-pages.yml y pulsa Run workflow para publicar GitHub Pages otra vez.
+## Paso 4 — Habilitar Gemini al terminar la revisión
 
-## 6. Activar el piloto (solo después de verificar protección y cuota)
+Antes de activar, revisa los límites/cuotas y presupuestos en Google AI Studio y prueba que Cloudflare está protegido contra peticiones inválidas. **Sin contraseña, el modo IA permite acceso a cualquiera que resuelva Turnstile**: no es apto para uso público de alto tráfico sin mejores controles.
 
-Confirma primero que Turnstile valida, que la contraseña no se comparte públicamente, que la cuenta Gemini tiene límite de gasto/cuota adecuado y que el Worker rechaza solicitudes inválidas. Regresa al workflow de GitHub y ejecútalo nuevamente con **activate_maya = true**. Esa opción guarda `MAYA_ENABLED=true` únicamente como secreto en Cloudflare.
+Abre el workflow de Maya y ejecuta manualmente **Run workflow**, rama `main`, con **activate_maya = true**. El Worker recibirá `MAYA_ENABLED=true`. Entonces prueba una conversación breve.
 
-En cualquier momento puedes ejecutar el mismo workflow con **activate_maya = false** para apagar nuevas llamadas a Gemini (el Worker queda publicado sin usar la API). El Worker no admite llamadas con la clave pública en el sitio; los mensajes llegan al Worker bajo verificación.
+Para apagar Gemini, ejecuta otra vez **Run workflow** con **activate_maya=false**. Los cambios futuros de código al Worker también lo desactivan de forma preventiva hasta que vuelvas a activarlo.
 
-**Limitación importante:** el código de piloto es compartido, el rate limiting es por IP y Turnstile es antibot, no autenticación por usuario. Para público general hacen falta cuentas por alumno y límites globales de gasto/uso. No publiques ni distribuyas el código piloto libremente.
+## Diagnóstico
 
-Este procedimiento automatiza la publicación, pero **sigue necesitando un Worker de Cloudflare**; GitHub Pages no ejecuta funciones privadas durante la visita.
+- `Guided Practice`: faltan las variables públicas o no se recompiló GitHub Pages.
+- `503`: Worker desactivado o faltan secretos.
+- `403`: problema con Turnstile, origen o token.
+- `429`: se agotó el límite aproximado de solicitudes.
+- `502`: verifica modelo, API key, cuota y disponibilidad de Gemini.
+
+Cualquier clave o token debe permanecer en GitHub Secrets, no en el chat.
