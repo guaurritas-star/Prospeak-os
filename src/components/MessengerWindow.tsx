@@ -3,7 +3,9 @@ import { ChatMessage } from '../types/os';
 import { playSound, speakText } from '../utils/audio';
 import { ProSpeakIcon } from './ProSpeakIcon';
 import { Lightbulb, CalendarClock, Handshake, Volume2, Mic, Square } from 'lucide-react';
-import { askMaya, isMayaAIConfigured } from '../utils/ai';
+import { askMaya, isMayaAIConfigured, mayaTurnstileSiteKey } from '../utils/ai';
+import { MayaVerification } from './MayaVerification';
+import { ShieldCheck } from 'lucide-react';
 
 interface MessengerWindowProps {
   initialPrompt?: string;
@@ -27,6 +29,9 @@ export const MessengerWindow: React.FC<MessengerWindowProps> = ({
   const [isRecording, setIsRecording] = useState(false);
   const [micIssue, setMicIssue] = useState('');
   const [aiIssue, setAiIssue] = useState('');
+  const [pilotCode, setPilotCode] = useState('');
+  const [verificationToken, setVerificationToken] = useState('');
+  const [challengeVersion, setChallengeVersion] = useState(0);
   const sendingRef = useRef(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const speechRecognitionRef = useRef<any>(null);
@@ -83,6 +88,11 @@ export const MessengerWindow: React.FC<MessengerWindowProps> = ({
   const handleSend = async (textToSend?: string) => {
     const text = (textToSend || inputText).trim().slice(0,1000);
     if (!text || sendingRef.current) return;
+    if(isMayaAIConfigured && (!pilotCode.trim() || !verificationToken)){
+      setInputText(text);
+      setAiIssue('Enter the class access code and complete verification before sending.');
+      return;
+    }
     sendingRef.current = true;
     setAiIssue('');
     playSound('click');
@@ -95,7 +105,7 @@ export const MessengerWindow: React.FC<MessengerWindowProps> = ({
       let responseText: string;
       let responseTips: string | undefined;
       if (isMayaAIConfigured) {
-        responseText = await askMaya(history);
+        responseText = await askMaya(history,{accessCode:pilotCode.trim(),turnstileToken:verificationToken});
       } else {
         const scripted = generateMayaResponse(text);
         responseText = scripted.text;
@@ -108,7 +118,14 @@ export const MessengerWindow: React.FC<MessengerWindowProps> = ({
       playSound('ding');
     } catch (err) {
       setAiIssue(err instanceof Error ? err.message : 'Service temporarily unavailable.');
+      // Keep the draft and remove the unanswered bubble so students can retry.
+      setInputText(text);
+      setMessages(prev=>prev.filter(m=>m.id!==userMsg.id));
     } finally {
+      if(isMayaAIConfigured){
+        setVerificationToken('');
+        setChallengeVersion(v=>v+1);
+      }
       sendingRef.current=false;
       setIsTyping(false);
     }
@@ -164,7 +181,7 @@ export const MessengerWindow: React.FC<MessengerWindowProps> = ({
   };
 
   return (
-    <div className="flex-1 flex flex-col justify-between overflow-hidden bg-[#F8FAFB] text-xs select-none">
+    <div className="flex-1 min-h-0 flex flex-col justify-between overflow-hidden bg-[#F8FAFB] text-xs">
       {/* Header bar */}
       <div className="bg-white border-b border-gray-200 px-3.5 py-2 flex items-center justify-between flex-shrink-0">
         <div className="flex items-center space-x-2">
@@ -269,6 +286,20 @@ export const MessengerWindow: React.FC<MessengerWindowProps> = ({
         </button>
       </div>
 
+      {isMayaAIConfigured && (
+        <section aria-label="Class pilot access" className="px-3 py-2 border-t border-[#DFE9EE] bg-[#F8FAFB] space-y-2">
+          <label className="flex items-center gap-2 text-xs font-semibold text-[#294B59]" htmlFor="maya-pilot-code">
+            <ShieldCheck size={16}/> ProSpeak pilot access code
+          </label>
+          <input id="maya-pilot-code" type="password" autoComplete="off" value={pilotCode}
+            onChange={e=>setPilotCode(e.target.value)} maxLength={128}
+            className="w-full rounded-lg border border-[#B6CED8] px-3 py-2 text-base"
+            placeholder="Provided by your ProSpeak teacher"/>
+          <p className="text-[11px] text-[#586F7B]">Only share practice messages. Don't include private workplace or personal information.</p>
+        </section>
+      )}
+      {isMayaAIConfigured && <MayaVerification siteKey={mayaTurnstileSiteKey}
+        onToken={setVerificationToken} refreshKey={challengeVersion}/>}
       {micIssue && <p role="status" className="text-xs px-3 py-2 bg-[#F8EBEF] text-[#7C4655]">{micIssue}</p>}
 
       {/* Input bar */}
@@ -289,14 +320,14 @@ export const MessengerWindow: React.FC<MessengerWindowProps> = ({
           type="text"
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+          onKeyDown={(e) => e.key === 'Enter' && !isTyping && handleSend()}
           placeholder="Message Maya... (Press Enter to send)"
           className="flex-1 min-w-0 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-base text-[#20404C] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#2C5261]"
         />
 
         <button
           onClick={() => handleSend()}
-          disabled={!inputText.trim() || isTyping}
+          disabled={!inputText.trim() || isTyping || (isMayaAIConfigured && (!pilotCode.trim() || !verificationToken))}
           className="px-3 py-2 rounded-xl bg-[#294B59] hover:bg-[#1E3B46] disabled:opacity-40 text-white font-semibold text-xs transition active:scale-95"
           title="Send Message"
         >

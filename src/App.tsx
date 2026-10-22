@@ -46,7 +46,7 @@ export default function App() {
       x: 0,
       y: 0,
       width: 440,
-      height: 385,
+      height: 590,
     },
     progress: {
       id: 'progress',
@@ -424,7 +424,7 @@ export default function App() {
             onMaximize={maximizeWindow}
             onClose={closeWindow}
             onMove={moveWindow}
-            defaultPositionClasses="absolute right-2 top-2 w-[min(440px,calc(100%-16px))] h-[385px] max-h-[calc(100%-16px)]"
+            defaultPositionClasses="absolute right-2 top-2 w-[min(440px,calc(100%-16px))] h-[min(590px,calc(100%-16px))]"
           >
             <MessengerWindow
               initialPrompt={initialMayaPrompt}

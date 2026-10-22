@@ -1,0 +1,20 @@
+{
+  "name": "prospeak-maya-api",
+  "main": "src/index.js",
+  "compatibility_date": "2026-10-01",
+  "workers_dev": true,
+  "vars": {
+    "ALLOWED_ORIGIN": "https://guaurritas-star.github.io",
+    "GEMINI_MODEL": "gemini-2.5-flash"
+  },
+  "ratelimits": [
+    {
+      "name": "MAYA_LIMITER",
+      "namespace_id": "171008",
+      "simple": {
+        "limit": 6,
+        "period": 60
+      }
+    }
+  ]
+}

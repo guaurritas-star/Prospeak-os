@@ -34,11 +34,15 @@ jobs:
       - name: Check TypeScript
         run: npm run lint
 
+      - name: Test Maya Cloudflare security
+        run: node --test workers/maya/test.mjs
+
       - name: Build for GitHub Pages
         run: npm run build
         env:
           GITHUB_PAGES: 'true'
           VITE_AI_API_URL: ${{ vars.PROSPEAK_AI_API_URL }}
+          VITE_TURNSTILE_SITE_KEY: ${{ vars.PROSPEAK_TURNSTILE_SITE_KEY }}
 
       - name: Configure Pages
         if: github.event_name != 'pull_request'
