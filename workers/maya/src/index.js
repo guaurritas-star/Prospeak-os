@@ -136,8 +136,8 @@ export default {
     while(messages[0]?.role==='model')messages.shift();
 
     try{
-      const model=env.GEMINI_MODEL||'gemini-2.5-flash';
-      const generationConfig={maxOutputTokens:450,temperature:0.65};
+      const model=env.GEMINI_MODEL||'gemini-3.5-flash-lite';
+      const generationConfig={maxOutputTokens:900,temperature:0.65};
       if(/^gemini-2\.5-flash(?:-lite)?(?:$|-)/.test(model)){
         generationConfig.thinkingConfig={thinkingBudget:0};
       }
@@ -146,11 +146,34 @@ export default {
         body:JSON.stringify({contents:messages,systemInstruction:{parts:[{text:instruction}]},
           generationConfig}),signal:AbortSignal.timeout(20000),
       });
-      if(!aiResponse.ok)return respond({error:'Gemini is unavailable. Check your model and API quota.'},502,allowedOrigin);
+      if(!aiResponse.ok){
+        // Only log sanitized provider metadata: NEVER log API keys, learner text or raw error messages.
+        const providerError=await aiResponse.json().catch(()=>({}));
+        const providerStatus=typeof providerError?.error?.status==='string' ? providerError.error.status : 'UNKNOWN';
+        console.warn('Maya Gemini API failed', {status:aiResponse.status,providerStatus,model});
+        const diagnostics = {
+          400: {code:'GEMINI_BAD_REQUEST',error:'Gemini rejected the request. Please check the model configuration.'},
+          401: {code:'GEMINI_AUTH',error:'Gemini API key was not accepted. Check your Google AI Studio key.'},
+          403: {code:'GEMINI_PERMISSION',error:'Gemini denied access. Check the API key permissions and project.'},
+          404: {code:'GEMINI_MODEL',error:'This Gemini model is unavailable for your project. Select a supported model.'},
+          429: {code:'GEMINI_QUOTA',error:'Gemini request quota or billing limit reached. Check Google AI Studio.'},
+        };
+        const diagnostic=diagnostics[aiResponse.status] ||
+          (aiResponse.status>=500
+            ? {code:'GEMINI_UPSTREAM',error:'Gemini is temporarily unavailable. Please retry later.'}
+            : {code:'GEMINI_OTHER',error:'Gemini could not complete the request. Check Worker logs.'});
+        return respond(diagnostic,502,allowedOrigin);
+      }
       const data=await aiResponse.json();
       const answer=data?.candidates?.[0]?.content?.parts?.filter(p=>typeof p.text==='string').map(p=>p.text).join(' ').trim();
-      if(!answer)return respond({error:'Maya could not answer. Please retry.'},502,allowedOrigin);
+      if(!answer){
+        console.warn('Maya Gemini returned no text', {model,finishReason:data?.candidates?.[0]?.finishReason||'UNKNOWN'});
+        return respond({code:'GEMINI_EMPTY',error:'Gemini did not return a text response. Please retry.'},502,allowedOrigin);
+      }
       return respond({reply:answer.slice(0,1800)},200,allowedOrigin);
-    }catch{return respond({error:'Maya is temporarily unavailable.'},502,allowedOrigin);}
+    }catch(error){
+      console.warn('Maya upstream connection issue', {name:error instanceof Error?error.name:'Unknown'});
+      return respond({code:'GEMINI_NETWORK',error:'Could not contact Gemini. Please try again shortly.'},502,allowedOrigin);
+    }
   }
 };
