@@ -1,3 +1,26 @@
+## Solución a "Gemini is unavailable" (octubre 2026)
+
+El workflow de GitHub muestra **Success** cuando Cloudflare recibió el Worker, **no** cuando Google Gemini generó una respuesta correcta.
+
+ProSpeak ahora usa por defecto `gemini-3.5-flash-lite` en `workers/maya/wrangler.jsonc`: Google limita el acceso a Gemini 2.5 en proyectos nuevos y recomienda los modelos 3.5 Flash-Lite o 3.8 Flash.
+
+Si Maya aún no responde, la pantalla reportará el tipo de error de Google (sin imprimir secretos):
+
+- **GEMINI_AUTH (401):** clave inválida, revocada o no aceptada; verifica que `GEMINI_API_KEY` sea nueva y válida.
+- **GEMINI_PERMISSION (403):** falta de permiso o clave de otro servicio; verifica la clave ligada a Gemini API.
+- **GEMINI_MODEL (404):** modelo no accesible; comprueba en Google AI Studio qué modelo admite el proyecto.
+- **GEMINI_QUOTA (429):** límite o cuota agotada; revisa cuotas y facturación.
+- **GEMINI_BAD_REQUEST (400):** configuración de solicitud incompatible; consulta los registros del Worker.
+- **GEMINI_UPSTREAM (5xx):** error temporal del proveedor.
+
+Para revisar registros sin exponer claves, abre **Cloudflare → Workers & Pages → prospeak-maya-api → Observability / Logs**. El Worker solo registra modelo, código HTTP y estado técnico, no mensajes del alumno ni claves.
+
+**IMPORTANTE:** todo push al Worker desde `main` lo deja **apagado** (`MAYA_ENABLED=false`) por seguridad. Al terminar este despliegue, vuelve a habilitarlo manualmente: [GitHub Actions — Deploy Maya Worker](https://github.com/guaurritas-star/Prospeak-os/actions/workflows/deploy-maya-cloudflare.yml) → **Run workflow** → `main` → `activate_maya=true`. Ejecuta una conversación breve y revisa el diagnóstico si falla.
+
+Nunca pegues la clave API aquí. Si una clave ha sido compartida en un chat, revócala y reemplázala en Repository Secrets antes de habilitar la IA.
+
+---
+
 ## Actualización UX: Maya conversa sin CAPTCHA en cada mensaje
 
 - Cuando el Worker está desactivado, Messenger informa "Gemini no está activo" y mantiene el modo guiado: una respuesta guionizada **no debe presentarse como Gemini**.
