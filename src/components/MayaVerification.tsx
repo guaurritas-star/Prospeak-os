@@ -43,6 +43,8 @@ export function MayaVerification({siteKey,onToken,refreshKey}:{
       widgetId=window.turnstile.render(host.current,{
         sitekey:siteKey,
         action:'maya_chat',
+        appearance:'interaction-only',
+        theme:'light',
         callback:(value:unknown)=>{if(mounted&&typeof value==='string')onToken(value);},
         'expired-callback':()=>{if(mounted)onToken('');},
         'error-callback':()=>{if(mounted){onToken('');setError('Verification failed. Please reload Messenger.');}},
@@ -55,9 +57,9 @@ export function MayaVerification({siteKey,onToken,refreshKey}:{
       }
     };
   },[siteKey,refreshKey]);
-  return <div className="px-3 py-2 border-t border-[#DFE9EE] bg-[#F2F7F9]" aria-label="Anti-abuse verification">
+  return <div className="px-3 py-1.5 border-t border-[#DFE9EE] bg-[#F2F7F9]" aria-label="One-time session verification">
     <div ref={host}/>
     {error && <p role="alert" className="text-sm text-[#964F64]">{error}</p>}
-    <p className="text-[11px] text-[#59727B] mt-1">Verification is required to protect the class pilot from automated use.</p>
+    <p className="text-[11px] text-[#59727B] mt-1">One-time security check for a 20-minute conversation. It appears only if needed.</p>
   </div>;
 }
