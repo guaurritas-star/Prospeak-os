@@ -254,7 +254,7 @@ export const MessengerWindow: React.FC<MessengerWindowProps> = ({
       <p className="px-3 py-1.5 text-[11px] bg-[#EFF5F7] text-[#526E7D] border-b border-[#E0EBEF]">
         {aiStatus==='ready' ? 'Gemini is available. You are protected by a short, verified session. Avoid sensitive details.' : aiStatus==='checking' ? 'Checking Gemini availability…' : 'Gemini is not active yet. You can practice with guided scenarios while the service is being enabled.'}
       </p>
-      {aiIssue && <div role="alert" className="bg-[#F9EDEF] text-[#864F5A] px-3 py-2 text-xs">AI unavailable: {aiIssue} Your message was not answered. Please try again.</div>}
+      {aiIssue && <div role="alert" className="bg-[#F9EDEF] text-[#864F5A] px-3 py-2 text-xs">Maya couldn't reply: {aiIssue} Your message remains in the text field so you can retry.</div>}
       {/* Messages Scroll Area */}
       <div className="flex-1 overflow-y-auto p-3.5 space-y-3">
         {messages.map((msg) => (
