@@ -1,3 +1,9 @@
+# OPCIÓN MÁS FÁCIL: GitHub Actions Secrets
+
+Si aparece `Missing git connection` en Cloudflare, **no hace falta repararlo**. Usa la guía [GitHub Secrets para desplegar Maya](GITHUB_SECRETS_MAYA.md), que evita la integración de GitHub desde Cloudflare. El método de importación descrito abajo queda como alternativa.
+
+---
+
 # Maya con Gemini · GitHub Pages + Cloudflare Workers
 
 ProSpeak OS (frontend) sigue en GitHub Pages. Solo Maya utiliza un Cloudflare Worker externo.
