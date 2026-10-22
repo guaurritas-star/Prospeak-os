@@ -1,7 +1,8 @@
 /** GitHub Pages is static. Secrets remain in the Cloudflare Worker. */
 import type { ChatMessage } from '../types/os';
 
-const configuredUrl = (import.meta.env.VITE_AI_API_URL || '').trim();
+// Public Worker endpoint; API keys and Turnstile secrets exist only on Cloudflare.
+const configuredUrl = (import.meta.env.VITE_AI_API_URL || 'https://prospeak-maya-api.studiomxcandy.workers.dev/api/chat').trim();
 export const mayaTurnstileSiteKey = (import.meta.env.VITE_TURNSTILE_SITE_KEY || '').trim();
 const isSecureWorkerEndpoint = /^https:\/\/[a-z0-9.-]+\.workers\.dev\/api\/chat$/i.test(configuredUrl) ||
   /^https:\/\/[a-z0-9.-]+\/api\/chat$/i.test(configuredUrl);
