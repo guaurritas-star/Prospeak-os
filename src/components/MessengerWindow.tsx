@@ -337,7 +337,7 @@ export const MessengerWindow: React.FC<MessengerWindowProps> = ({
       {canChatWithAI && (hasCurrentSession || sessionChecking) &&
         <div role="status" className="px-3 py-1 text-[11px] text-[#4A7868] border-t border-[#DFE9EE] bg-[#F3F8F5]">
           {sessionChecking ? 'Securing conversation…' : 'Protected conversation · Ready to chat'}
-        </div>}}
+        </div>}
       {micIssue && <p role="status" className="text-xs px-3 py-2 bg-[#F8EBEF] text-[#7C4655]">{micIssue}</p>}
 
       {/* Input bar */}
