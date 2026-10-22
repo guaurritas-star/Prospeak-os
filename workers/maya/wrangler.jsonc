@@ -15,6 +15,14 @@
         "limit": 6,
         "period": 60
       }
+    },
+    {
+      "name": "MAYA_GLOBAL_LIMITER",
+      "namespace_id": "171009",
+      "simple": {
+        "limit": 15,
+        "period": 60
+      }
     }
   ]
 }

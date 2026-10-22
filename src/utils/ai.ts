@@ -9,7 +9,7 @@ const isSecureWorkerEndpoint = /^https:\/\/[a-z0-9.-]+\.workers\.dev\/api\/chat$
 export const isMayaAIConfigured = isSecureWorkerEndpoint && mayaTurnstileSiteKey.length > 0;
 
 export async function askMaya(messages: ChatMessage[], credentials: {
-  accessCode: string; turnstileToken: string;
+  turnstileToken: string;
 }, signal?: AbortSignal): Promise<string> {
   if (!isMayaAIConfigured) throw new Error('Maya AI is not configured yet.');
   const history = messages.slice(-12).filter(x=>x.sender==='user'||x.sender==='maya')
@@ -19,7 +19,7 @@ export async function askMaya(messages: ChatMessage[], credentials: {
   const response = await fetch(configuredUrl,{
     method:'POST',
     headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({messages:history,accessCode:credentials.accessCode,turnstileToken:credentials.turnstileToken}),
+    body:JSON.stringify({messages:history,turnstileToken:credentials.turnstileToken}),
     signal,
   });
   const result: {reply?:unknown;error?:unknown} = await response.json().catch(()=>({}));

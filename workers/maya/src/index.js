@@ -1,6 +1,6 @@
 /**
  * ProSpeak OS — Maya pilot API (Cloudflare Worker).
- * Never include the Gemini key, Turnstile secret or pilot passphrase in frontend code.
+ * Gemini and Turnstile secrets must never be included in frontend code.
  * Fail closed until MAYA_ENABLED=true and all Worker secrets are set.
  */
 const MAX_BODY = 14_000;
@@ -14,15 +14,6 @@ const reply = (body, status, origin) => new Response(JSON.stringify(body),{
     'Vary':'Origin',
   } : {})},
 });
-
-const sameSecret = async (a,b) => {
-  const encoder=new TextEncoder();
-  const [left,right]=await Promise.all([a,b].map(v=>crypto.subtle.digest('SHA-256',encoder.encode(v))));
-  const x=new Uint8Array(left),y=new Uint8Array(right);
-  let unequal=0;
-  for(let i=0;i<x.length;i++) unequal |= x[i]^y[i];
-  return unequal===0;
-};
 
 const instruction=[
   'You are Maya, a warm and professional English speaking partner for ProSpeak OS.',
@@ -54,13 +45,16 @@ export default {
     if(request.method!=='POST')return reply({error:'Method not allowed'},405,allowedOrigin);
     if(new URL(request.url).pathname!=='/api/chat')return reply({error:'Not found'},404,allowedOrigin);
     if(env.MAYA_ENABLED!=='true')return reply({error:'Maya AI is not active yet.'},503,allowedOrigin);
-    if(!env.GEMINI_API_KEY || !env.TURNSTILE_SECRET_KEY || !env.PILOT_ACCESS_CODE || env.PILOT_ACCESS_CODE.length<12 || !env.MAYA_LIMITER){
+    if(!env.GEMINI_API_KEY || !env.TURNSTILE_SECRET_KEY || !env.MAYA_LIMITER || !env.MAYA_GLOBAL_LIMITER){
       return reply({error:'Maya AI is not fully configured.'},503,allowedOrigin);
     }
 
     const clientIP=request.headers.get('CF-Connecting-IP')||'unknown';
     const result=await env.MAYA_LIMITER.limit({key:'maya:'+clientIP});
     if(!result.success)return reply({error:'Too many requests. Please try again later.'},429,allowedOrigin);
+    // Approximate shared limit per Cloudflare location; it is NOT a strict worldwide spending cap.
+    const shared=await env.MAYA_GLOBAL_LIMITER.limit({key:'prospeak:maya:shared'});
+    if(!shared.success)return reply({error:'Maya has reached the shared request limit. Please try again later.'},429,allowedOrigin);
 
     const headerLength=Number(request.headers.get('content-length')||0);
     if(headerLength>MAX_BODY)return reply({error:'Message too large.'},413,allowedOrigin);
@@ -70,9 +64,6 @@ export default {
     let body;
     try {body=JSON.parse(rawText);}catch{return reply({error:'Invalid JSON.'},400,allowedOrigin);}
     if(!body || typeof body!=='object')return reply({error:'Invalid request.'},400,allowedOrigin);
-    if(typeof body.accessCode!=='string'||body.accessCode.length>128 || !await sameSecret(body.accessCode,env.PILOT_ACCESS_CODE)){
-      return reply({error:'Invalid pilot access code.'},403,allowedOrigin);
-    }
     if(typeof body.turnstileToken!=='string'||body.turnstileToken.length<1||body.turnstileToken.length>2048){
       return reply({error:'Complete the verification before sending.'},400,allowedOrigin);
     }

@@ -6,15 +6,15 @@ const origin='https://guaurritas-star.github.io';
 const url='https://prospeak-maya-api.example.workers.dev/api/chat';
 const env=(extras={})=>({
   MAYA_ENABLED:'true',
-  PILOT_ACCESS_CODE:'a-fake-very-long-test-code',
   GEMINI_API_KEY:'test-secret-never-use',
   TURNSTILE_SECRET_KEY:'turnstile-test-secret',
   ALLOWED_ORIGIN:origin,
   GEMINI_MODEL:'gemini-2.5-flash',
   MAYA_LIMITER:{limit:async()=>({success:true})},
+  MAYA_GLOBAL_LIMITER:{limit:async()=>({success:true})},
   ...extras,
 });
-const message={accessCode:'a-fake-very-long-test-code',turnstileToken:'test-token',
+const message={turnstileToken:'test-token',
   messages:[{role:'user',text:'Hello Maya. I work in marketing.'}]};
 const request=(body=message,originHeader=origin)=>new Request(url,{
   method:'POST',headers:{Origin:originHeader,'Content-Type':'application/json'},
@@ -29,10 +29,6 @@ test('worker defaults to disabled before Cloudflare secrets are configured',asyn
   const result=await worker.fetch(request(),env({MAYA_ENABLED:'false'}));
   assert.equal(result.status,503);
 });
-test('worker rejects invalid pilot code',async()=>{
-  const result=await worker.fetch(request({...message,accessCode:'wrong-code'}),env());
-  assert.equal(result.status,403);
-});
 test('worker requires verification token and valid messages',async()=>{
   const result=await worker.fetch(request({...message,turnstileToken:''}),env());
   assert.equal(result.status,400);
@@ -42,6 +38,14 @@ test('worker requires verification token and valid messages',async()=>{
 test('worker enforces rate limit before Gemini and Turnstile',async()=>{
   const result=await worker.fetch(request(),env({MAYA_LIMITER:{limit:async()=>({success:false})}}));
   assert.equal(result.status,429);
+});
+test('worker enforces shared request budget before Gemini',async()=>{
+  const result=await worker.fetch(request(),env({MAYA_GLOBAL_LIMITER:{limit:async()=>({success:false})}}));
+  assert.equal(result.status,429);
+});
+test('worker rejects missing shared limiter configuration',async()=>{
+  const result=await worker.fetch(request(),env({MAYA_GLOBAL_LIMITER:null}));
+  assert.equal(result.status,503);
 });
 test('only a valid Turnstile token permits a Gemini call',async()=>{
   const previous=globalThis.fetch;
