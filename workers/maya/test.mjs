@@ -49,7 +49,7 @@ test('only a valid Turnstile token permits a Gemini call',async()=>{
   globalThis.fetch=async (target,init)=>{
     calls++;
     if(String(target).includes('siteverify')){
-      assert.match(String(init.body),'secret=');
+      assert.match(String(init.body),/secret=/);
       return Response.json({success:true,hostname:'guaurritas-star.github.io',action:'maya_chat'});
     }
     assert.match(String(target),/generateContent$/);
