@@ -38,16 +38,16 @@ Abre: https://github.com/guaurritas-star/Prospeak-os/actions/workflows/deploy-ma
 
 Este proceso usa GitHub Secrets para guardar la clave Gemini como **secreto de ejecución en Cloudflare**, sin Git connection. Comprueba que las acciones finalicen correctamente antes de activar llamadas de pago.
 
-## Paso 3 — Configurar las dos variables públicas del sitio
+## Paso 3 — Configurar la clave pública de Turnstile
 
 En https://github.com/guaurritas-star/Prospeak-os/settings/variables/actions (Repository Variables):
 
 | Nombre | Valor |
 |---|---|
-| `PROSPEAK_AI_API_URL` | `https://TU-WORKER.TU-CUENTA.workers.dev/api/chat` (usa tu URL real) |
+| `PROSPEAK_AI_API_URL` | Opcional: ya se usa por defecto `https://prospeak-maya-api.studiomxcandy.workers.dev/api/chat` |
 | `PROSPEAK_TURNSTILE_SITE_KEY` | Site key **pública** del widget Turnstile |
 
-El widget Turnstile debe autorizar el hostname `guaurritas-star.github.io`. No confundas Site key con Secret key.
+La variable **obligatoria** es `PROSPEAK_TURNSTILE_SITE_KEY` (no la secret key). El endpoint del Worker ya está configurado en código. El widget Turnstile debe autorizar el hostname `guaurritas-star.github.io`. No confundas Site key con Secret key.
 
 Ejecuta el workflow https://github.com/guaurritas-star/Prospeak-os/actions/workflows/deploy-pages.yml → **Run workflow**. Así el frontend recibe las variables públicas. En ausencia de ellas, Maya permanece en Guided Practice.
 
