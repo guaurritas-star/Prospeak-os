@@ -1,3 +1,16 @@
+## Actualización UX: Maya conversa sin CAPTCHA en cada mensaje
+
+- Cuando el Worker está desactivado, Messenger informa "Gemini no está activo" y mantiene el modo guiado: una respuesta guionizada **no debe presentarse como Gemini**.
+- Cuando el Worker se habilita y la web tiene la clave pública de Turnstile, una sola verificación inicia una **sesión firmada de 20 minutos**. La conversación continúa sin repetir el widget después de cada mensaje. Cloudflare solo aparece si requiere interacción.
+- La sesión se guarda en memoria de la pestaña, no en localStorage ni cookies, y está ligada a la IP usada en la verificación. Si cambia de red, se pedirá otra verificación.
+- La clave privada Gemini y la clave privada Turnstile permanecen en el Worker.
+- Los límites de solicitudes son aproximados por ubicación, **no** un presupuesto global fijo. Sin login, el sitio permite acceder a cualquiera que pase Turnstile. No lo dejes abierto masivamente sin mejores controles.
+- El código actual usa Gemini 2.5 Flash con pensamiento desactivado para respuestas conversacionales ágiles y un prompt que responde a preguntas reales en vez de forzar guiones. La calidad real debe verificarse **una vez que Gemini esté activo**.
+
+Para encender Gemini: [GitHub Actions — Deploy Maya Worker](https://github.com/guaurritas-star/Prospeak-os/actions/workflows/deploy-maya-cloudflare.yml), **Run workflow** → rama `main` → activar `activate_maya=true`, solo tras comprobar las cuotas y que la clave Gemini no esté expuesta. El despliegue automático de cambios al Worker lo deja apagado inicialmente.
+
+---
+
 # ProSpeak OS — Gemini con Cloudflare desde GitHub (sin código piloto)
 
 ProSpeak OS sigue alojado en GitHub Pages. El Worker de Cloudflare aloja únicamente la API privada de Maya. No uses la clave Gemini en `VITE_*`, código público ni capturas.
